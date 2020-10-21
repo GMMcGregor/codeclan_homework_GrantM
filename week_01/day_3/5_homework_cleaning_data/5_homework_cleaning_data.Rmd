@@ -1,0 +1,79 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+```{r}
+library(tidyverse)
+```
+Read in and assign
+```{r}
+KaggleMoviesData <- read_csv("data/movies.csv")
+KaggleMoviesData
+```
+
+```{r}
+movies_selected <- KaggleMoviesData %>% 
+  select("title", "runtime", "budget")
+movies_selected
+```
+
+```{r}
+movies_selected %>% 
+  filter(is.na(runtime))
+```
+```{r}
+movies_selected %>% 
+  filter(is.na(runtime) |
+         is.na(budget) |
+  is.na(title))
+```
+```{r}
+movies_runtime <- movies_selected %>% 
+  mutate(runtime = na_if(runtime, "0"))
+         movies_runtime
+```
+
+
+```{r}
+# counting missing values
+movies_runtime %>% 
+  summarise(count = sum(is.na(runtime)))
+```
+
+
+```{r}
+# replace na observations in the monthly_charges column, with the median of that column
+movies_imputed <- movies_runtime %>%
+    mutate(runtime = coalesce(runtime, median(runtime, na.rm = TRUE)))
+
+movies_imputed
+```
+
+
+```{r}
+# counting missing values
+movies_imputed %>% 
+  summarise(count = sum(is.na(runtime)))
+```
+
+#use the slice_min and slice_max functions on movies_imputed to get the movies with the 10 shortest and 10 longest runtimes.
+
+```{r}
+movies_imputed %>%
+  slice_min(runtime, n = 10)
+```
+
+```{r}
+movies_imputed %>%
+  slice_max(runtime, n = 10)
+```
+#Using the if_else function, impute anything with a budget below $100 with the median budget. Overwrite your movies_imputed so it contains the new budget values.
+```{r}
+# replace na observations in the monthly_charges column, with the median of that column
+movies_imputed_median <- movies_imputed %>%
+  median(movies_imputed na.rm = TRUE))
+    mutate(movies_imputed if_else(budget < 100, median)
+
+
+```
+
