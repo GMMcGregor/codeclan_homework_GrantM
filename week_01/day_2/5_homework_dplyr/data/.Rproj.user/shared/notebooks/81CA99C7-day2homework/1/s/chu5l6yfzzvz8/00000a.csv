@@ -1,0 +1,26 @@
+"0","sb_calories <- read_csv(""starbucks_drinkMenu_expanded.csv"")"
+"2","
+[36m──[39m [1m[1mColumn specification[1m[22m [36m────────────────────────────────────────────────────────────────[39m
+cols(
+  Beverage_category = [31mcol_character()[39m,
+  Beverage = [31mcol_character()[39m,
+  Beverage_prep = [31mcol_character()[39m,
+  Calories = [32mcol_double()[39m,
+  `Total Fat (g)` = [31mcol_character()[39m,
+  `Trans Fat (g)` = [32mcol_double()[39m,
+  `Saturated Fat (g)` = [32mcol_double()[39m,
+  `Sodium (mg)` = [32mcol_double()[39m,
+  `Total Carbohydrates (g)` = [32mcol_double()[39m,
+  `Cholesterol (mg)` = [32mcol_double()[39m,
+  `Dietary Fibre (g)` = [32mcol_double()[39m,
+  `Sugars (g)` = [32mcol_double()[39m,
+  `Protein (g)` = [32mcol_double()[39m,
+  `Vitamin A (% DV)` = [31mcol_character()[39m,
+  `Vitamin C (% DV)` = [31mcol_character()[39m,
+  `Calcium (% DV)` = [31mcol_character()[39m,
+  `Iron (% DV)` = [31mcol_character()[39m,
+  `Caffeine (mg)` = [31mcol_character()[39m
+)
+
+"
+"0","sb_calories"

@@ -1,0 +1,55 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+sb_calories <- read_csv("starbucks_drinkMenu_expanded.csv")
+sb_calories
+```
+```{r}
+head(sb_calories)
+```
+```{r}
+dim(sb_calories)
+```
+
+```{r}
+names(sb_calories)
+```
+
+```{r}
+glimpse(sb_calories)
+```
+
+```{r}
+calories <- select(sb_calories, Beverage_category : Calories)
+calories
+
+```
+
+```{r}
+filter(calories, Calories != "NA")
+```
+```{r}
+calorie_diff <- mutate(sb_calories, calorie_diff = 135 - Calories)
+calorie_diff
+```
+```{r}
+sb_stats <- sb_calories %>%
+                        group_by(Beverage_category) %>%
+                        summarise(calories_mean = mean(Calories)) %>%
+                        arrange(desc(calories_mean))
+                      sb_stats
+                    
+                        
+```
+
+```{r}
+sb_stats_av<- sb_calories %>%
+                        group_by(Beverage_prep) %>%
+                        summarise(calories_average = ave(Calories)) %>%
+                        arrange((calories_average))
+                      sb_stats_av
+```
+

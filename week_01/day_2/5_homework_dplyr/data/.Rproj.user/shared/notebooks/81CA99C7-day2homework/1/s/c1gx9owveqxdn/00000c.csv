@@ -1,0 +1,7 @@
+"0","sb_stats <- sb_calories %>%"
+"0","                        group_by(Beverage_category) %>%"
+"0","                        summarise(calories_mean = mean(Calories)) %>%"
+"0","                        arrange(desc(calories_mean))"
+"2","`summarise()` ungrouping output (override with `.groups` argument)
+"
+"0","                      sb_stats"

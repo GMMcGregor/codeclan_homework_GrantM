@@ -1,0 +1,2 @@
+"0","calorie_diff <- mutate(sb_calories, calorie_diff = 135 - Calories)"
+"0","calorie_diff"

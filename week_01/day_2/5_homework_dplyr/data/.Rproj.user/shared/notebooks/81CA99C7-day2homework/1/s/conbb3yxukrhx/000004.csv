@@ -1,0 +1,7 @@
+"0","sb_stats_av<- sb_calories %>%"
+"0","                        group_by(Beverage_prep) %>%"
+"0","                        summarise(calories_average = ave(Calories)) %>%"
+"0","                        arrange((calories_average))"
+"2","`summarise()` regrouping output by 'Beverage_prep' (override with `.groups` argument)
+"
+"0","                      sb_stats_av"
