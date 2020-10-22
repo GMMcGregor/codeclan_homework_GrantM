@@ -71,9 +71,9 @@ movies_imputed %>%
 ```{r}
 # replace na observations in the monthly_charges column, with the median of that column
 movies_imputed_median <- movies_imputed %>%
-  median(movies_imputed na.rm = TRUE))
-    mutate(movies_imputed if_else(budget < 100, median)
+  mutate(budget = if_else(budget < 100, 
+  median(budget, na.rm = TRUE), budget))
 
-
+movies_imputed_median
 ```
 
