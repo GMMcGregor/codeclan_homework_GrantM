@@ -1,0 +1,81 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse
+        )
+```
+
+#  describe/summarise at least 5 things about this dataset -Be prepared to share one of your findings on Monday!
+
+
+```{r}
+kaggle_goodreads_books <- read_csv('book_data/books.csv')
+kaggle_goodreads_books
+```
+8472 rows with 12 columns
+```{r}
+dim(kaggle_goodreads_books)
+```
+
+```{r}
+names(kaggle_goodreads_books)
+```
+
+
+```{r}
+kaggle_goodreads_books %>% 
+  arrange(desc(ratings_count))
+```
+
+
+
+```{r}
+kaggle_goodreads_books %>% 
+  arrange(desc(text_reviews_count))
+```
+
+```{r}
+names(kaggle_goodreads_books)
+```
+group languages
+```{r}
+
+
+```
+# group languages and order descending
+# next step would be to rename all variations of English to get total value 
+# then to invesitgate within this English group as with other language groups
+
+```{r}
+kaggle_goodreads_books %>% 
+  filter(!is.na(language_code)) %>% 
+  group_by(language_code) %>% 
+  summarise(
+    count = n()
+  ) %>% 
+  arrange(desc(count)) %>% 
+  #trying to change en-US to eng
+  mutate(language_code, "en-US" = "eng")
+```
+#then aggregate all english variations to get total English
+#then investigate top English author via average_rating, ratings_count, text_reviews_count
+
+
+#group by author
+#Stephen King has most mentions
+```{r}
+kaggle_goodreads_books %>% 
+  filter(!is.na(authors)) %>% 
+  group_by(authors) %>% 
+  summarise(
+    count = n()
+  ) %>% 
+  arrange(desc(count))
+```
+
+
+
+
