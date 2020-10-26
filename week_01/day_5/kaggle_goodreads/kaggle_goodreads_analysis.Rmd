@@ -75,6 +75,17 @@ kaggle_goodreads_books %>%
   ) %>% 
   arrange(desc(count))
 ```
+```{r}
+kaggle_goodreads_books %>% 
+  select(authors, average_rating, num_pages) %>% 
+  mutate(mean_pages = mean(num_pages, na.rm = TRUE)) %>% 
+  filter(authors == "Stephen King") %>% 
+  mutate(mean_rating = mean(average_rating, na.rm = TRUE)) %>% 
+  arrange ((average_rating)) 
+
+  
+  
+```
 
 
 
