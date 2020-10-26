@@ -12,7 +12,7 @@ library(tidyverse
 
 
 ```{r}
-kaggle_goodreads_books <- read_csv('book_data/books.csv')
+kaggle_goodreads_books <- read_csv("book_data/books.csv")
 kaggle_goodreads_books
 ```
 8472 rows with 12 columns
