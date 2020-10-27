@@ -114,13 +114,18 @@ obs_coded
 
 Unite `day`, `month`, and `year` columns into a column called `date` using a suitable separator. Then find the date where the most berets were observed.
 ```{r}
-date_united <- obs_coded %>% 
-  # unite the codes and descriptions back together 
-hospital_visits_unite <- hospital_visits_coded %>%
-  unite(disease, c("code", "description"), sep =":")
 
-head(hospital_visits_unite)
+dates_unite <- obs_coded %>% 
+  unite(col = date,
+         c("day", "month", "year"),
+         sep = ":")
+         
+         dates_unite
 ```
+#6 dates where the most berets were observed
+```{r}
 
+arrange(dates_unite, desc(observation_count))
+```
 
 
