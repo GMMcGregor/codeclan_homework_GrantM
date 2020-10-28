@@ -78,7 +78,7 @@ code_clan_tweets %>%
 total_likes <- code_clan_tweets %>% 
                  select(favorite_count, media_type) %>% 
                   group_by(media_type) %>% 
-                  summarise(favorite_count)
+                  tally(favorite_count)
                   
 total_likes
                     
