@@ -76,10 +76,14 @@ code_clan_tweets %>%
 4. Count the total number of likes (i.e. total of `favorite_count`), split by `media` type, and arrange them from most likes to least. Assume that any tweets without a listed `media` type are of type "text". 
 ```{r}
 total_likes <- code_clan_tweets %>% 
-                 filter(favorite_count) %>% 
-                    filter(group_by(media_type))
-                      arrange(desc(total_likes)
+                 select(favorite_count, media_type) %>% 
+                  group_by(media_type) %>% 
+                  summarise(favorite_count)
+                  
+total_likes
                     
+                    
+
 ```
 
 
