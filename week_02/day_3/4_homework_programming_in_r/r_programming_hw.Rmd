@@ -1,0 +1,93 @@
+---
+title: "Programming in R Homework"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    df_print: paged
+    css: ../../../styles.css
+  pdf_document: default
+---
+
+# MVP
+
+## 
+
+### 
+
+Find the weather forecast for the next three days
+Each list element should have the name of the day of the week. Inside each element should be another named list that tells you the temperature, chance of rain and wind speed.
+
+## 
+
+Using the list you've just made find:
+
+1. The chance of rain tomorrow
+2. The wind speed on the day after tomorrow
+3. The temperature tomorrow.
+
+## 
+
+###
+
+Find a 14 day forecast and create a matrix of the forecasts for temperature, where each week is one row.
+
+You will want to give a name to the matrix you create.
+
+
+### 
+
+Now select:
+
+1. The third day of the second week
+2. The whole second week
+3. The first, third and fifth days in both weeks.
+
+
+##
+
+Write a function that pre-appends "The answer is: " to any character input, and either returns the number for numbers less than 10, or divides the number by 10 for numbers greater than 10. For anything else return "Invalid input".
+
+
+##
+
+Write a function which checks if two vectors have the same elements. 
+
+If they have the same elements in the same order, return "Exactly the same"
+
+If they have the same elements but in a different order, return "The same"
+
+If they don't have the same elements, return "Different".
+
+<details>
+<summary>**Hint**</summary>
+You can check if two vectors have the same elements but in a different order by using `sort` to sort each vector first and then checking if they are equal.
+</details>
+</blockquote>
+
+
+
+# Extension
+
+##
+
+Write code that prints a multiplication table for numbers up to 12. i.e. there will be 12 rows and 12 columns, and each element should be the row number multiplied by the column number.
+
+*From: https://adriann.github.io/programming_problems.html*
+
+
+
+##
+
+Write a function that takes a vector, and creates a text art histogram, like the one below.
+
+You may want to use the function `cat()`. This is similar to `print()`, but prints directly, without vector markers. You can also include newlines `"\n"` when using `cat()`.
+
+```
+1 | ***
+2 | *
+3 | *******
+4 | ****
+5 | **
+```

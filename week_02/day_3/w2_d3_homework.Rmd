@@ -1,0 +1,95 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+```
+
+
+#Find the weather forecast for the next three days
+#Each list element should have the name of the day of the week. Inside each element should be another named list that tells you the temperature, chance of rain and wind speed.
+
+```{r}
+Edinburgh_forecast <- list(
+                  "thur" = list(temp = 11, rain_percent = 90, wind_speed = 14),
+                  "fri"  = list(temp = 12, rain_percent = 66, wind_speed = 25),
+                  "sat"  = list(temp = 12, rain_percent = 80, wind_speed = 22)
+)
+
+                  Edinburgh_forecast
+```
+
+
+# Using the list you've just made find:
+
+1. The chance of rain tomorrow
+```{r}
+Edinburgh_forecast$fri$rain_percent
+```
+
+#2. The wind speed on the day after tomorrow
+
+```{r}
+Edinburgh_forecast$sat$wind_speed
+```
+
+3. The temperature tomorrow.
+```{r}
+Edinburgh_forecast$fri$temp
+```
+
+
+#Find a 14 day forecast and create a matrix of the forecasts for temperature, where each week is one row.
+
+```{r}
+
+temps<- list(14, 15, 14, 12, 10, 9, 9, 11, 11, 9, 9, 8, 8, 8)
+
+        Edin_forecast <- matrix(temps, nrow = 2, ncol = 7, byrow = TRUE)
+        rownames(Edin_forecast) <- c("week_1", "week_2")
+        
+        Edin_forecast
+        class(Edin_forecast)
+ 
+```
+
+
+#1. The third day of the second week
+```{r}
+Edin_forecast[2, 3]
+```
+
+#2. The whole second week
+```{r}
+Edin_forecast[2, ]
+```
+
+
+#3. The first, third and fifth days in both weeks.
+```{r}
+
+Edin_forecast[c(1,2) ,c(1, 3, 5)]
+```
+
+
+
+##
+
+Write a function that pre-appends "The answer is: " to any character input, and either returns the number for numbers less than 10, or divides the number by 10 for numbers greater than 10. For anything else return "Invalid input".
+
+
+##
+
+Write a function which checks if two vectors have the same elements. 
+
+If they have the same elements in the same order, return "Exactly the same"
+
+If they have the same elements but in a different order, return "The same"
+
+If they don't have the same elements, return "Different".
+
+
+You can check if two vectors have the same elements but in a different order by using `sort` to sort each vector first and then checking if they are equal.
+
