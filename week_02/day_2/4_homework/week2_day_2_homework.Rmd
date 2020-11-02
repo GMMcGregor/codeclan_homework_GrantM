@@ -64,12 +64,10 @@ code_clan_tweets %>%
 Again, omit quoted tweets from the mean.
 
 ```{r}
-code_clan_tweets %>% 
-                      filter(retweet_count & is_quote == FALSE) %>% 
+              code_clan_tweets %>% 
+                      filter(is_quote == FALSE) %>% 
                       group_by(source) %>% 
-                      tally(mean_number_retweets)
-
-
+                      summarise(average_retweet = mean(retweet_count))
 ```
 
 
@@ -77,21 +75,54 @@ code_clan_tweets %>%
 ```{r}
 total_likes <- code_clan_tweets %>% 
                  select(favorite_count, media_type) %>% 
-                  group_by(media_type) %>% 
+                  group_by(media_type, "NA" == "text") %>% 
                   tally(favorite_count)
+
                   
 total_likes
                     
-                    
+```
+4 answer:
 
+```{r}
+codeclan_tweets %>%
+  mutate(media_type2 = replace_na(media_type, "text")) %>%
+  group_by(media_type2) %>%
+  summarise(favourite_count_total = sum(favorite_count)) %>%
+  arrange(desc(favourite_count_total))
 ```
 
 
 
-5. Find the mean number of characters that a CodeClan tweet contains. 
+5. Find the mean number of characters that a CodeClan tweet contains.
+
+#answers next day
+```{r}
+codeclan_tweets %>%
+  summarise(avg_tweet_length = mean(display_text_width))
+```
 
 
 6. The `code_clan_info.csv` data file contains `status_url` along with other info. Load this in, and join it to the `code_clan_tweets` tibble, so that you have a `status_url` for each tweet. Decide which variable to join the tibbles on. 
 
+#answers next day
+```{r}
+codeclan_info <- read_csv("data/code_clan_info.csv")
+names(codeclan_info)
+codeclan_all <- left_join(codeclan_tweets,codeclan_info, by = "tweet_id")
+```
+
 
 7. From your new joined data, create a new tibble `codeclan_hashtags` containing only the `tweet_id` and hashtags in lowercase for analysis. Keep only those tweets with hashtags.
+
+#answers next day
+```{r}
+codeclan_hashtags <- codeclan_all%>% 
+  select(tweet_id, hashtags) %>%
+  mutate(lowcase_hashtag = str_to_lower(hashtags)) %>%
+  select(-hashtags) %>%
+  drop_na(lowcase_hashtag)
+
+codeclan_hashtags
+```
+

@@ -1,0 +1,55 @@
+---
+title: "Data loading - programming skills"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+In the following task you will be asked to read in a CSV data file, of which only a part contains useful data. You will then subset the contents of the resulting dataframe down to just the useful part. We'll guide you through how to do this **programatically**, i.e. by writing code to detect and subset down to the useful part, rather than manually manipulating the data.
+
+It's important to learn this skill because the ability to code in this way is what separates `R` (and `Python`) from other data analysis environments. Imagine you had to process many files in this way: it is far more efficient to write general purpose code once, than to manually manipulate data in each file.
+
+Let's get started!
+
+## Data.csv
+
+1. Read in the data (where any blank characters will come through as `NA`) and examine the contents of the dataframe. Do you see that only part of the dataframe contains useful data?  
+
+
+2. Find the index of the row in the dataframe at which the data starts, and save this to a variable `min_which_not_na`. Remember, try to do this **programatically**: write code to detect where the data starts (i.e. **don't** just manually inspect the dataframe and then set `min_which_not_na <- 4`).  
+<details>
+<summary>**Hints**</summary>
+Look at the docs for `which()`, `is.na()` and `min()`. Can you see a way to use these together to do this?
+</details>
+<br>
+
+3. Find the index of the row in the sheet at which the data ends, and save this to a variable `max_which_not_na`. As above, do this programatically!  
+<details>
+<summary>**Hints**</summary>
+Can you see a way to re-use your code from the last question here? We are looking for the **last** row in which the first index is not `NA`.
+</details>
+<br>
+
+3. Now use the row indices `min_which_not_na` and `max_which_not_na` calculated above to subset the dataframe to only the useful rows. 
+
+
+4. So we have the rows containing the useful data. Now we need to remove the columns in which all entries are `NA`.   
+<details>
+<summary>**Hints**</summary>
+Look at the docs for `colSums()`. Can you use this function together with `is.na()` to get the number of `NA`s in **each** column?  
+A column is all `NA`s if the number of `NA`s in the column equals `nrow()` of the cut down dataframe we are using. Can you use this to programatically determine which columns are all `NA`s?
+</details>
+<br>
+
+5. Take the first row of the useful data and use it to set column names. Delete this row.
+
+
+## Extension
+
+1. Read in the data1.csv, where any blank characters will come through as NA. 
+
+
+2. Find the top left non-na entry (row and column entry). 

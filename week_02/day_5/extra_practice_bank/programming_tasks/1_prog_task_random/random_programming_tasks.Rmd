@@ -1,0 +1,124 @@
+---
+title: "Extra programming tasks"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+# For loops & apply 
+
+## Question 1
+Create vectors `x` and `y` using the commands 
+
+```{r}
+x <- c(1, 2, 9)
+y <- c(2, 6, 4)
+```
+
+Write a for `loop` to compute the element-wise product vector, saving your results in a new vector z,  $z = x \times y$ (e.g. $z_1 = x_1 \times y_1, \; z_2 = x_2 \times y_2, ...$).  Compare this to `x * y` in R. 
+
+
+## Question 2
+
+Define `x` to be a sample of size 10 from the N(0, 1) distribution using `x <- rnorm(10)` (don't worry if you've not come across a distribution before, we will be covering probability distributions in statistics, but for now just need to know it generates some random numbers between -1 and 1).  
+
+Replace all values that are less than 0 with 0 using the following methods:  
+
+  a.  the `ifelse()` function
+  b.  a `for` loop including an `if` statement
+  c.  writing a function (to convert a number to zero if negative) and then use that function in an `apply()` statement
+  
+
+<br>
+
+## Question 3
+
+Function `cumsum()` computes the cumulative sum of a vector. Use a `for` loop instead of this built in function to compute the cumulative sum of `x` from exercise 2. Compare your loop to the `cumsum` function. 
+
+<br>
+
+## Question 4
+
+Consider the following lines of code that work on a matrix `x` containing observations of several real-valued variables:
+
+```{r, eval=FALSE}
+x.min <- apply(x, 2, min)
+x.max <- apply(x, 2, max) 
+
+for (i in 1:nrow(x)) {
+  x[i, ] <- (x[i, ] - x.min) / (x.max - x.min)
+}
+```
+
+  a. **Without running the code** explain what each line of the code does. 
+  b. **Without running the code** what is the range of the columns of `x` once the code has been run?
+  c. Can you rewrite this code using 'loop-avoidance' functions (e.g. `apply()`)? 
+  
+
+<br>
+
+## Question 5
+
+Load the library `CodeClanData`, check the help file for the `qb_monthly_sales` dataset and inspect some of the data 
+
+  a. Find the date of the highest costs using the function `which.max()`. 
+  b. Find the date of the lowest revenue using the function `which.min()`. 
+
+<br>
+
+# Functions
+
+## Question 6
+
+Write an R function `quadratic()` which computes the real-valued solutions of a quadratic equation
+
+$$a \times x^2 + b \times x + c$$
+Your function should take `a`, `b` and `c` as arguments and return the unique solutions to the above quadratic equation (we'll show you the maths below to do this). 
+
+* Your function should start by computing the *discriminant* $\Delta = b^2 - 4 \times a \times c$
+* If $\Delta < 0$, then the quadartic has no real solutions. In this case, the function should return a message "No solution".
+* If $\Delta = 0$, then the quadratic equation has exactly one ("double") solution, $-\frac{b}{2 \times a}$. In this case, return this value only. 
+* If$\Delta > 0$, then the quadratic equation has two solutions, $-\frac{b + \sqrt{\Delta}}{2 \times a}$ and $\frac{b + \sqrt{\Delta}}{2 \times a}$. In this case return a vector of length two containing both solutions. 
+
+<br>
+
+## Question 7
+
+Consider the following function 
+
+```{r}
+my_function <- function(z) {
+ m <- Inf
+ for (i in 1:length(z)) {
+   if (z[i] < m) { 
+     m <- z[i] 
+   }
+ }
+ return(m)
+}
+```
+
+**Without running the function** what does `my_function()` do? Can you explain it in plain language?
+
+<br>
+
+
+
+# Problem solving
+
+## Question 8
+
+Create the following vector without using the function `c()` at all
+
+    5 6 7 4 5 6 3 4 5 2 3 4
+    
+<details>
+<summary>**Hint**</summary>
+Consider creating 2 vectors and adding them, and remember that you can create vectors using other functions such as `rep()` or `seq()`.
+
+</details>
+</blockquote>

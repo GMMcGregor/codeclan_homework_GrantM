@@ -1,0 +1,61 @@
+---
+title: "Weekend Homework - Cleaning and Analysis Data"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    df_print: paged
+    css: ../../../styles.css
+  pdf_document: default
+---
+
+# MVP
+
+For this weekend homework you will create an R project with two pieces of code:
+
+1. An .R file that cleans some data on meteorites.
+2. A .Rmd file that takes your cleaned data and performs some analysis.
+
+You will also write a short `README.md` that describes the structure of your project.
+
+The data you want to clean is in the file called `meteorite_landings.csv`. It comes from NASA and has information on meteorites that have been found up to the year 2013. 
+
+## The .R file
+
+To clean the data please do the following.
+
+1. Read the data into R
+2. Change the names of the variables to follow our naming standards.
+3. Split in column `GeoLocation` into latitude and longitude, the new latitude and longitude columns should be numeric.
+4. Replace any missing values in latitude and longitude with zeros.
+5. Remove meteorites less than 1000g in weight from the data.
+6. Order the data by the year of discovery.
+
+We would also like you to include assertive programming to make sure that:
+
+1. The data has the variable names we expect ("id", "name", "mass (g)", "fall", "year", "GeoLocation").
+2. Latitude and longitude are valid values. (Latitude between -90 and 90, longitude between -180 and 180).
+
+## The .Rmd file
+
+In the .Rmd file please do the following.
+
+1. Read the cleaned data into R.
+2. Find the names and years found for the 10 largest meteorites in the data.
+3. Find the average mass of meteorites that were recorded falling, vs. those which were just found.
+4. Find the number of meteorites in each year, for every year since 2000.
+
+## The project structure
+
+1. Make sure your use an RStudio Project.
+2. Make a repo on GitHub and commit your code to this repo regularly.
+3. It is up to you how to store your code and data. Make sure it is clear for others using the project.
+
+## The README.md file
+
+Make a plain text file called `README.md`. In this file we just want you to describe the structure of your project, and explain what each piece of code you have written does.
+
+# Extension
+
+Keep exploring the data! Can you find anything interesting?
