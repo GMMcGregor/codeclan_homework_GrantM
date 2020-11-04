@@ -10,7 +10,6 @@ WHERE department = 'Human Resources';
 SELECT 
 	first_name, 
 	last_name,
-	department,
 	country
 FROM employees 
 WHERE department = 'Legal';
@@ -25,7 +24,7 @@ FROM employees
 WHERE country = 'Portugal';
 
 
---Count the number of employees based in either Portugal or Spain.
+--4Count the number of employees based in either Portugal or Spain.
 
 SELECT 
 	COUNT(id) AS number_employees
@@ -34,9 +33,6 @@ WHERE country = 'Portugal' OR country = 'Spain';
 
 
 --Count the number of pay_details records lacking a local_account_no.
-SELECT *
-FROM pay_details;
-
 
 
 SELECT 
@@ -52,7 +48,7 @@ SELECT
 	first_name,
 	last_name
 FROM employees 
-ORDER BY last_name;
+ORDER BY last_name ASC NULLS LAST
 
 --7How many employees have a first_name beginning with ‘F’?
 
@@ -83,9 +79,8 @@ GROUP BY department;
 
 
 
---10btain a table showing department, 
-			--fte_hours and 
-			--the number of employees in each department who work each fte_hours pattern. 
+--10btain a table showing department,fte_hours and the number of employees 
+--in each department who work each fte_hours pattern. 
 			--Order the table alphabetically by department, 
 			--and then in ascending order of fte_hours.
 			
@@ -94,10 +89,8 @@ SELECT
 	fte_hours,
 	COUNT(id) AS number_employees_working_fte_hours_pattern
 FROM employees
-GROUP BY fte_hours
-WHERE fte_hours IS NOT NULL
-GROUP BY department
-ORDER BY fte_hours;
+GROUP BY department, fte_hours 
+ORDER BY department ASC NULLS LAST, fte_hours ASC NULLS LAST;
 
 
 
@@ -114,11 +107,16 @@ ORDER BY fte_hours;
  WHERE first_name IS NULL
  GROUP BY department 
 HAVING COUNT(id) >= 2
-ORDER BY department; 
+ORDER BY COUNT(id), department;
 
 
  	
  
 --12[Tough!] Find the proportion of employees in each department who are grade 1.
 
-
+answered
+SELECT 
+  department, 
+  SUM(CAST(grade = '1' AS INT)) / CAST(COUNT(id) AS REAL) AS prop_grade_1 
+FROM employees 
+GROUP BY department
