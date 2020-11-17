@@ -1,0 +1,112 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(CodeClanData)
+```
+
+```{r}
+backpack
+```
+9 columns
+```{r}
+names(backpack)
+```
+#1_Load in the libraries you need, and look at the backpack data. Take note of variable names and dimensions.
+
+#2_What is the distribution of backpack weights that students are carrying? Choose an appropriate graph to show the distribution.
+
+#almost a normal distribution 
+
+```{r}
+ggplot(backpack) +
+  aes(x = backpack_weight) +
+  geom_bar(fill = "blue")
+```
+
+
+#3_Are there differences in backpack weight between sex?
+#majority of women tend to carry  backpacks in weigh range 5-15kg
+```{r}
+ggplot(backpack) +
+  aes(x = backpack_weight, fill = sex) +
+  geom_bar()
+```
+
+
+#4_What is the relationship between body weight and backpack weight?
+#as bodyweight increases  backpack weight has a slight positive correlation but not marked.
+```{r}
+ggplot(backpack) +
+ aes(x = body_weight, y = backpack_weight) +
+geom_point(colour = "blue")
+```
+
+
+#5_Is this relationship different between men and women? Choose an appropriate plot and interpret your findings.
+#different yes. Men tend to carry majority of backpacks in weight range 5-20kg
+```{r}
+ggplot(backpack) +
+ aes(x = body_weight, y = backpack_weight, colour = sex) +
+geom_point()
+```
+
+#6_What proportion of students report back pain?
+#maybe this is unnecessary.
+
+```{r}
+backpain <- backpack %>% 
+          select(back_problems, sex) %>% 
+         summarise(back_problems) %>% 
+          count(back_problems)
+backpain
+
+```
+
+
+```{r}
+ggplot(backpain) +
+  aes(x = , fill = back_problems) +
+  geom_bar(position = "fill")
+```
+
+
+
+
+Question 7.
+
+Is this proportion different between men and women?
+fill by gender
+Yes.
+
+
+```{r}
+ggplot(backpack) +
+  aes(x = back_problems, fill = sex,) +
+  geom_bar(position = "fill")
+```
+
+
+Question 8.
+
+Now you’ve investigated your data separately, create plots to describe the relationship between backpack weight, body weight, gender and reported backpain.
+```{r}
+backpack
+```
+
+  hmm..trying to wrap my head around it
+```{r}
+ggplot(backpack)  +
+  aes(x =backpack_weight, fill = sex) +
+    geom_histogram(col = "white") +
+      facet_wrap( body_weight ~ back_problems)
+```
+
+
+
+Try both backpack_weight and body_weight as well as the ratio.
+
+Hint: faceting would be useful here.

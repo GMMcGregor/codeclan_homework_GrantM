@@ -1,0 +1,65 @@
+---
+title: "dplyr Practice Questions"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    df_print: paged
+    css: ../../styles.css
+  pdf_document: default
+---
+
+
+# Using the dplyr verbs
+
+Use the `salaries` dataset to answer the following questions.
+
+1.	Use select to see the beginning salary variable and the current salary variable.
+2.	Use filter to see the employees aged over 50, who have a salary over £20,000.
+3.	Use arrange to order by the data so that the highest salaries are first.
+4.	Use mutate to make a new variables beginning_salary_pence and current_salary_pence. These should have the corresponding salaries in pence instead of pounds.
+5.	Use summarise to find the maximum age and the minimum age.
+6.	Find the minimum salary and the maximum salary.
+7.	Find all the employees aged under 30.
+8.	Order the data in terms of increasing educational level where ties are broken using age.
+9.	Drop all the non-numeric variables in the tibble.
+10.	Find all employees with either less than 2 years work experience or an education level below 12.
+11.	Transform the salary variables so they measure how many 1000s of pounds each salary is.
+12.	Find all the females employees with an employment category of 'security officer'.
+13.	Find the average salary across each employment category.
+14.	What is the average salary across each employment category for just the males?
+15.	Find the number of white females, white males, non-white females and non-white males.
+16.	What is happens when we use summary statistics like mean with mutate?
+mutate(df, mean_age = mean(current_salary))
+You may need to use View to see the whole data.
+Now use group_by with mutate and mean. What do you see?
+
+
+# Pipes
+
+Again, answer these questions using the salaries dataset.
+
+1.	Find the average salary per educational level, for educational levels of 16 and below. Arrange the results from highest salary to lowest. Answer using pipes.
+2.	Find the average salary for each gender in each employment category. Exclude any employees with less than 2 years of work experience. Answer using pipes.
+3.	For each employment category find the difference between the mean salary and the median salary. Arrange so that the greatest difference comes first. Answer using pipes. (The difference between mean salary and median salary gives us a measure of how skewed salaries are - see unit 1.)
+
+# Missing values exercise
+
+In this exercise we will be looking at the beer calorie data (dataset beer). We saw how to read this delimited data in week 2.
+
+1.	Find all the observations where the carbohydrates are missing.
+2.	Find all the observations where the brand is missing.
+3.	What is different about the observations missing carbohydrates and the observations missing brand? To clean the data should be drop the rows missing brand or the rows missing carbohydrates?
+
+# Recoding excercise 
+
+Use the dataset inmates.
+
+1. Change the 'M'/'F' values in gender to be 'Male'/'Female'.
+2. For the race variable, everything is in capital letters, change each level to title case. Also combine 'AMER IND' and 'ASIAN' into an 'Other' category.
+3. a.	Make a new variable bond_level which is High whenever the bond for an inmate is above $1,000,000 and Normal otherwise.
+b.	How many inmates have a high bond level?
+4.	Modify the detainer variable so that NONE, IMIGRATION and FEDERAL are in title case and all other levels are set to Other.
+
+

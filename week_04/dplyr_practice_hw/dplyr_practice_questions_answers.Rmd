@@ -1,0 +1,184 @@
+---
+title: "dplyr Practice Questions"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    df_print: paged
+    css: ../../../styles.css
+  pdf_document: default
+---
+
+
+# Using the dplyr verbs
+
+Use the `salaries.csv` dataset to answer the following questions.
+
+```{r, message = FALSE}
+library(tidyverse)
+
+salaries <- read_csv("data/salaries.csv")
+```
+
+
+1.	Use select to see the beginning salary variable and the current salary variable.
+2.	Use filter to see the employees aged over 50, who have a salary over £20,000.
+3.	Use arrange to order by the data so that the highest salaries are first.
+4.	Use mutate to make a new variables beginning_salary_pence and current_salary_pence. These should have the corresponding salaries in pence instead of pounds.
+5.	Use summarise to find the maximum age and the minimum age.
+6.	Find the minimum salary and the maximum salary.
+7.	Find all the employees aged under 30.
+8.	Order the data in terms of increasing educational level where ties are broken using age.
+9.	Drop all the non-numeric variables in the tibble.
+10.	Find all employees with either less than 2 years work experience or an education level below 12.
+11.	Transform the salary variables so they measure how many 1000s of pounds each salary is.
+12.	Find all the females employees with an employment category of 'security officer'.
+
+*Answers*
+
+```{r}
+#1
+select(salaries, beginning_salary, current_salary)
+
+#2
+filter(salaries, age > 50 & current_salary > 20000)
+
+#3
+arrange(salaries, desc(current_salary))
+
+#4
+mutate(salaries, beginning_salary_pence = beginning_salary*100,
+           current_salary_pence   = current_salary*100)
+
+#5
+summarise(salaries, max_age = max(age),
+              min_age = min(age))
+
+#6
+summarise(salaries, min_salary = min(current_salary),
+              max_salary = max(current_salary))
+#7
+filter(salaries, age < 30)
+
+#8
+arrange(salaries, educational_level, age)
+
+#9
+select(salaries, -gender, -employment_category, -is_white)
+
+#10
+filter(salaries, work_experience < 2 | educational_level < 12)
+
+#11
+mutate(salaries, current_salary = current_salary/1000,
+           beginning_salary = beginning_salary/1000)
+
+#12
+filter(salaries, gender == 'female' & employment_category == 'security officer')
+
+# Sort of a trick question; there is none! R has given us a table with no observations.
+```
+
+# Pipes
+
+Again, answer these questions using the salaries dataset.
+
+1.	Find the average salary per educational level, for educational levels of 16 and below. Arrange the results from highest salary to lowest. Answer using pipes.
+2.	Find the average salary for each gender in each employment category. Exclude any employees with less than 2 years of work experience. Answer using pipes.
+3.	For each employment category find the difference between the mean salary and the median salary. Arrange so that the greatest difference comes first. Answer using pipes. (The difference between mean salary and median salary gives us a measure of how skewed salaries are - see unit 1.)
+
+*Answers*
+
+1. 
+
+```{r}
+salaries %>%
+  filter(educational_level < 17) %>%
+  group_by(educational_level) %>%
+  summarise(mean_salary = mean(current_salary)) %>%
+  arrange(desc(mean_salary))
+```
+
+2. 
+
+```{r}
+salaries %>%
+  filter(work_experience > 2) %>%
+  group_by(gender, employment_category) %>%
+  summarise(mean_salary = mean(current_salary))
+```
+
+3. 
+
+```{r}
+salaries %>%
+  group_by(employment_category) %>%
+  summarise(mean_salary = mean(current_salary),
+            median_salary = median(current_salary)) %>%
+  mutate(difference = mean_salary - median_salary) %>%
+  arrange(desc(difference))
+```
+
+# Missing values exercise
+
+In this exercise we will be looking at the beer calorie data (dataset `beer.txt`). We saw how to read this delimited data in week 2.
+
+1.	Find all the observations where the carbohydrates are missing.
+2.	Find all the observations where the brand is missing.
+3.	What is different about the observations missing carbohydrates and the observations missing brand? To clean the data should be drop the rows missing brand or the rows missing carbohydrates?
+
+```{r, message = FALSE}
+beer <- read_delim("data/beer.txt", delim = ";")
+
+#1
+filter(beer, is.na(carbohydrates))
+
+#2 
+filter(beer, is.na(brand))
+
+#3
+# We have less values missing for the brand variable. Most of the observations that are missing brand are also missing all other observations. This means it might be quite sensible to drop the rows where brand is missing. If would be less sensible to drop the observations that are missing carbohydrates as we still have a lot of useful information in those rows. However, in same cases (like a specific study of carbohydrates in beer) we might want to only include rows with carbohydrate data. 
+```
+
+# Recoding excercise 
+
+Use the dataset `inmates.csv`.
+
+1. Change the 'M'/'F' values in gender to be 'Male'/'Female'.
+2. For the race variable, everything is in capital letters, change each level to title case. Also combine 'AMER IND' and 'ASIAN' into an 'Other' category.
+3. a.	Make a new variable bond_level which is High whenever the bond for an inmate is above $1,000,000 and Normal otherwise.
+b.	How many inmates have a high bond level?
+4.	Modify the detainer variable so that NONE, IMIGRATION and FEDERAL are in title case and all other levels are set to Other.
+
+
+```{r, message = FALSE}
+inmates <- read_tsv("data/inmates.tsv")
+
+#1
+inmates <- mutate(inmates, gender = if_else(gender == 'M', 'Male', 'Female'))
+
+#2 
+inmates <- 
+mutate(inmates, race = recode(race, WHITE    = 'White',
+                                    BLACK    = 'Black',
+                                    HISPANIC = 'Hispanic',
+                                    .default = 'Other'))
+
+#3a
+inmates <- mutate(inmates, bond_level = if_else(bond_amount > 1000000, 'High', 'Normal'))
+
+#3b
+sum(inmates$bond_level == 'High')
+
+#3c
+inmates <-
+  mutate(inmates, detainer = recode(detainer,
+                                    NONE       = 'None',
+                                    IMIGRATION = 'Immigration',
+                                    FEDERAL    = 'Federal',
+                                    .default   = 'Other'))
+```
+
+
+
