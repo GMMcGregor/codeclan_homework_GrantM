@@ -100,9 +100,9 @@ backpack
   hmm..trying to wrap my head around it
 ```{r}
 ggplot(backpack)  +
-  aes(x =backpack_weight, fill = sex) +
-    geom_histogram(col = "white") +
-      facet_wrap( body_weight ~ back_problems)
+  aes(x =body_weight, fill = sex) +
+    geom_histogram(col = "white")
+     # facet_wrap( body_weight ~ back_problems)
 ```
 
 
@@ -110,3 +110,10 @@ ggplot(backpack)  +
 Try both backpack_weight and body_weight as well as the ratio.
 
 Hint: faceting would be useful here.
+
+```{r}
+ggplot(data=dat, aes(x=Types, y=Number, fill=sample)) + 
+  geom_bar(position = 'dodge', stat='identity') +
+  geom_text(aes(label=Number), position=position_dodge(width=0.9), vjust=-0.25)
+```
+
