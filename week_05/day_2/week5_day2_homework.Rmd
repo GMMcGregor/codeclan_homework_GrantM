@@ -58,9 +58,17 @@ kwikbit_revenue_and_costs <- monthly_sales %>%
     filter(Cashflow != "Kwikbit Unit 1 Sales")
 kwikbit_revenue_and_costs
 ```
+or
+
+```{r}
+revenue_and_costs <- subset(qb_monthly_sales, Cashflow != "Kwikbit Unit 1 Sales")
+```
+
+
+
 ```{r}
 ggplot(kwikbit_revenue_and_costs) +
-    aes(x = Date, y = Amount, fill = Cashflow) +
+    aes(x = Date, y = Amount, colour = Cashflow) +
     geom_line() +
     labs(title = "Monthly revenue and costs")
     
@@ -68,7 +76,7 @@ ggplot(kwikbit_revenue_and_costs) +
 ```
 
 
-Show annual sales of personal fitness trackers over the last 5 years broken down by company as a ribbon plot (use geom_area). This data is in qb_competitors.
+#4Show annual sales of personal fitness trackers over the last 5 years broken down by company as a ribbon plot (use geom_area). This data is in qb_competitors.
 
 
 ```{r}
@@ -84,7 +92,7 @@ ggplot(competitors) +
 ```
 
 
-Now show the sales from the 5 competitors as a line graph. Include an extra layer that shows the data points used to make the lines.
+#5Now show the sales from the 5 competitors as a line graph. Include an extra layer that shows the data points used to make the lines.
 
 ```{r}
 ggplot(competitors) +
@@ -96,7 +104,7 @@ ggplot(competitors) +
 ```
 
 
-#Now the company wants to compare the number of steps that their device counts vs. their competitors. 
+#6Now the company wants to compare the number of steps that their device counts vs. their competitors. 
 #Make a line graph of the number of steps throughout time
 #and use faceting to compare between individuals and people. 
 #Data is in qb_device_data.
