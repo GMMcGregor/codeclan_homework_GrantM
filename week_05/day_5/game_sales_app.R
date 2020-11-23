@@ -5,7 +5,8 @@ library(CodeClanData)
 game_sales <- game_sales
 
 ui <- fluidPage(
-#looking at video games sales data by genre and platform assessing which 
+#looking at how publishers and developers sales and critic/user scores 
+#compare by genre and platform .
   #platforms and genres performed positively.
     titlePanel("Video Games Publisher/Developer Analysis by Genre and Platform"),
 
