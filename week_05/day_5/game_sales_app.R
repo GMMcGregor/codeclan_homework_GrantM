@@ -7,7 +7,7 @@ game_sales <- game_sales
 ui <- fluidPage(
 #looking at video games sales data by genre and platform assessing which 
   #platforms and genres performed positively.
-    titlePanel("Video Games Analysis by Genre and Platform"),
+    titlePanel("Video Games Publisher/Developer Analysis by Genre and Platform"),
 
     sidebarLayout(
       sidebarPanel(
@@ -37,8 +37,8 @@ ui <- fluidPage(
                      fluidRow(
                        column(6, plotOutput("sales_publisher")),
                        column(6, plotOutput("sales_developer")),
-                       column(6, plotOutput("sales_user_score")),
-                       column(6, plotOutput("sales_critic_score"))
+                       column(6, plotOutput("user_score")),
+                       column(6, plotOutput("critic_score"))
                       ),
                      ),
             tabPanel("Data",
@@ -80,15 +80,15 @@ server <- function(input, output) {
     })
     #looking at relationship between sales by critic_score and user_score. 
     #user_score by year of release and sales
-    output$sales_user_score <- renderPlot({
+    output$user_score <- renderPlot({
       ggplot(filtered_data()) +
-        aes(x = year_of_release, y = user_score, fill = sales) +
+        aes(x = year_of_release, y = user_score, fill = publisher) +
         geom_col()
     })
     #critic_score by year of release and sales
-    output$sales_critic_score <- renderPlot({
+    output$critic_score <- renderPlot({
       ggplot(filtered_data()) +
-        aes(x = year_of_release, y = critic_score, fill = sales) +
+        aes(x = year_of_release, y = critic_score, fill = developer) +
         geom_col()
     })
     
