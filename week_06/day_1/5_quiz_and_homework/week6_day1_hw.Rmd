@@ -1,0 +1,119 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(prob)
+library(gtools)
+library(tidyverse)
+```
+
+```{r}
+titanic <- read_csv("data/titanic.csv")
+head(titanic)
+```
+
+
+Have a look at the distinct values of the class variable, this will tell you whether each individual was a passenger (1st, 2nd or 3rd class) or a member of the crew (treat restaurant staff as crew)
+```{r}
+titanic %>% 
+  distinct(class)
+```
+
+```{r}
+crew_recode <- titanic %>% 
+# filter(class) %>% 
+   mutate(crew = recode(class,
+                        "engineering crew" = TRUE,
+                        "victualling crew" = TRUE,
+                        "restaurant staff" = TRUE,
+                        "deck crew" = TRUE,
+                        .default = FALSE)) 
+crew_recode
+  
+```
+prob(crew)
+```{r}
+crew_recode %>% 
+  count(crew == TRUE)
+```
+Therefore 2207 total complement.
+Prob(crew) = 890 / (1317+890)
+           = 890 / 2207
+           =0.4032
+        
+```{r}
+prob_crew <- crew_recode %>% 
+  filter(crew == TRUE) %>% 
+  summarise(prob =n()/ nrow(crew_recode))
+
+prob_crew
+```
+      
+      
+```{r}
+prob_survive_and_crew <- crew_recode %>% 
+  filter(survived == "yes" & crew == TRUE ) %>% 
+  summarise(prob =n()/ nrow(crew_recode))
+
+  prob_survive_and_crew
+```
+confirming this 
+prob(crew and survived) = 211/2207 = 0.095
+
+```{r}
+
+crew_recode %>% 
+  count(crew == TRUE & survived == "yes")
+```
+prob(survived | crew = prob(survived AND crew) / prob(crew)
+            
+```{r}
+prob_survive_given_crew = prob_survive_and_crew/prob_crew
+prob_survive_given_crew
+
+```
+to confirm via dplyer
+
+
+```{r}
+prob_survived_given_crew = crew_recode %>% 
+  filter(crew == TRUE) %>% 
+  summarise(prob = sum(survived == "yes")/n())
+prob_survived_given_crew
+```
+```{r}
+prob_survived_given_passenger <- crew_recode %>% 
+  filter(crew == FALSE) %>% 
+  summarise(prob = sum(survived == "yes")/n())
+prob_survived_given_passenger
+```
+#Therefore:
+prob_survived_given_crew = 0.237 while
+prob_survived_given_passenger = 0.380 (to 3sf)
+Therefore it was more likely to survive given a passenger
+
+#Part2
+1. If I roll a six-sided dice once, what is the probability of getting a number less than 5?
+
+#prob(x < 5) = 4/6
+
+
+2. How many outcomes are there in the sample space of an experiment in which we toss three dice?
+
+# S = 3cubed = 27
+
+
+3. In an experiment where we roll four dice:how many outcomes are in the event total_equals_5_6_7 (i.e. the total of the four dice equals 5, 6 or 7)?
+
+Sample space = 6^4 = 1296. 
+(total_equals_5_6_7)
+
+
+#what is the probability of this event?
+#what assumptions do we apply in answering part ii?
+ Hint
+
+4. Five chairs are placed in a row in a room, along with five people of differing height. The people sit down randomly on the chairs. What is the probability that they sit in order of decreasing height, left to right?
+

@@ -1,0 +1,131 @@
+---
+title: "Probability homework"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    df_print: paged
+    css: ../../../styles.css
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.align = 'center')
+```
+
+# MVP - The Titanic
+
+```{r, echo=FALSE, fig.cap="**Fig. 1.** The RMS Titanic leaving Southport, 10th April 1912 (public domain)", out.width = '60%'}
+knitr::include_graphics("images/RMS_Titanic.jpg")
+```
+
+A data set detailing the survival or death of passengers and crew members on the RMS Titanic is given in the `data` folder. Some time after the disaster a journalist wrote that crew members were *more likely* to have survived the sinking than passengers. This was disputed by a descendant of one of the surviving crew members, who suggested that the opposite was true, i.e. passengers were *more likely* to have survived than crew.  
+
+You're going to calculate the conditional probabilities $\textrm{prob}(\textrm{ survived } \mid \textrm{ crew })$ and $\textrm{prob}(\textrm{ survived } \mid \textrm{ passenger })$ to settle this dispute.
+
+Have a look at the distinct values of the `class` variable, this will tell you whether each individual was a passenger (1st, 2nd or 3rd class) or a member of the crew (treat restaurant staff as crew)
+
+**Loading packages**
+
+You may want to use `prob` and `gtools` later in the homework, and the `tidyverse` for this section, but if you load `prob` after `tidyverse`, `dplyr::filter()` will be masked. So load your packages in this order:
+
+```{r, message = FALSE}
+library(prob)
+library(gtools)
+library(tidyverse)
+```
+
+<details>
+<summary>**Hints**</summary>
+
+* You may want to create a `crew` column containing values `TRUE` or `FALSE` to help with this
+* For $\textrm{prob}(\textrm{ survived } \mid \textrm{ crew })$ think 'what proportion of the crew survived?', and similar for $\textrm{prob}(\textrm{ survived } \mid \textrm{ passenger })$ 
+
+</details>
+
+# MVP and Extension - Probability problems
+
+Today was pretty full-on! Here are some problems to help you consolidate what you learned. Feel free to work on paper or in `R`, whichever you are most comfortable with:
+
+**MVP - try _four_ of the problems**  
+**Extension - try more than four!**
+
+<br>
+1. If I roll a six-sided dice once, what is the probability of getting a number less than 5?
+
+<br>
+2. How many outcomes are there in the sample space of an experiment in which we toss three dice?
+
+<br>
+3. In an experiment where we roll four dice:
+
+  i. how many outcomes are in the event `total_equals_5_6_7` (i.e. the total of the four dice equals $5$, $6$ or $7$)?
+  ii. what is the probability of this event?
+  iii. what assumptions do we apply in answering part ii?
+
+<details>
+<summary>**Hint**</summary>
+For part i, `rowSums(.)` may help you setup up the necessary random variable `total` (or you can use `pivot_longer()`)
+</details>
+
+<br>
+4. Five chairs are placed in a row in a room, along with five people of differing height. The people sit down randomly on the chairs. What is the probability that they sit in order of decreasing height, left to right?
+
+<details>
+<summary>**Hint**</summary>
+This is an arrangement where order matters. Of all the possible arrangements, how many are correct?
+</details>
+
+<br>
+5. I roll six dice:
+
+  i. what is the probability I see the numbers 6, 5, 4, 3, 2 and 1 in order on the dice, left to right?
+  ii. what is the probability I see one each of the numbers 6, 5, 4, 3, 2 and 1 on the dice regardless of order?
+  
+[**Hint** have a look at the `isin()` function in the `prob` package. For example, to `filter` all rows containing $6$, $1$, $2$ in that order, you could use `isin(., c(6, 1, 2), ordered = TRUE)`]
+  
+<br>
+6. If I draw a single card from a 52-card deck, and it is black, what is the probability that its suit is spades? <br>
+<details> 
+<summary>**Hints**</summary>
+
+* Investigate the `cards()` function in the `prob` package, if you'd like to try this in R (make a deck without jokers). 
+* You could think about adding your own `black_card` random variable to the sample space, which would be `TRUE` if the `suit` is 'Spade' or 'Club', and `FALSE` otherwise.
+
+</details>
+
+<br>
+7. Eight patients: Alice, Bob, Carmen, Dinesh, Ella, Fergus, Gianna and Henry are waiting to see a doctor, but only five appointment slots are left today. 
+
+  i. In how many different orders can the doctor see patients today?<br>
+  <details> 
+  <summary>**Hint**</summary>
+  `permutations()` returns a matrix, but it's better to convert it to a tibble with `as_tibble()`. You can then set column names etc.]
+  </details>
+  
+  ii. What is the probability of Gianna and Danesh **both** being seen today?<br>
+  <details> 
+  <summary>**Hint**</summary> 
+  Filter using `isin()`
+  </details>
+  
+  iii. What is the probability of Gianna being seen **before** Dinesh today?<br>
+  <details> 
+  <summary>**Hint**</summary>
+  Think about the `ordered =` argument of `isin()`
+  </details>
+  
+  iv. **(harder)** Carmen and Henry have now been triaged as high priority and will be seen in the first two available slots, although their order hasn't yet been determined. In how many different orders can the patients now be seen?<br>
+  <details> 
+  <summary>**Hint**</summary>
+  Think of this as a two-step experiment: (1) choose order of high priority patients, (2) choose order of remaining patients. Get separate tibbles for steps (1) and (2) and then `merge()` them (make sure the column names are all distinct however or `merge()` will try to join on any repeated column names - not what we want).]
+  </details>
+  
+<br>
+8. If order is not significant, how many ways are there to select a 5 student quiz team from a group of 8 students?
+
+<br>
+9. **(harder)** How would your answer for question 8 change if a team captain had to be selected for each team?
+
+
