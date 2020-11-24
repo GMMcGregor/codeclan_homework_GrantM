@@ -40,7 +40,7 @@ crew_recode
 prob(crew)
 ```{r}
 crew_recode %>% 
-  count(crew == TRUE)
+  count(crew)
 ```
 #Therefore 2207 total complement.
 Prob(crew) = 890 / (1317+890)
@@ -84,7 +84,7 @@ to confirm via dplyer
 
 ```{r}
 prob_survived_given_crew = crew_recode %>% 
-  filter(crew == TRUE) %>% 
+  filter(crew) %>% 
   summarise(prob = sum(survived == "yes")/n())
 prob_survived_given_crew
 ```
@@ -107,7 +107,7 @@ Therefore it was more likely to survive given a passenger
 
 2. How many outcomes are there in the sample space of an experiment in which we toss three dice?
 
-# S = 3^3 = 27
+# S = 6^3 = 216!!
 
 
 3. In an experiment where we roll four dice:how many outcomes are in the event total_equals_5_6_7 (i.e. the total of the four dice equals 5, 6 or 7)?
@@ -119,6 +119,7 @@ Sample space = 6^4 = 1296.
 s_four_dice <- rolldie(4)
 s_four_dice
 ```
+
 ```{r}
 s_four_dice %>% 
   summarise(size_of_s = n())

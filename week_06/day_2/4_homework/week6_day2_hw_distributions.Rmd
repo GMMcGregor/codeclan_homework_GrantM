@@ -1,0 +1,123 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(prob)
+library(tidyverse)
+library(here)
+```
+
+```{r}
+library(janitor)
+```
+
+```{r}
+phones <- read_csv(here("data/20190928-items.csv")) %>% 
+clean_names()
+
+
+phones
+```
+```{r}
+names(phones)
+```
+#1 Find the brand with the highest numbers of phones in the dataset.
+
+#Samsung has 397 phones
+```{r}
+phones %>% 
+  count(brand)
+
+```
+
+
+#2_For your top brand, plot the distribution of phone ratings as a probability density, overlaying a fitted normal distribution.
+```{r}
+samsung_ratings <- phones %>% 
+  select(brand, rating) %>% 
+  filter(brand == "Samsung")
+
+samsung_ratings
+```
+
+```{r}
+count(samsung_ratings)
+```
+
+```{r}
+samsung_stats <- phones %>% 
+  filter(brand == "Samsung") %>% 
+  summarise(
+    num =n(),
+    mean = mean(rating),
+    sd = sd(rating)
+  )
+
+samsung_stats
+```
+
+```{r}
+phones %>% 
+  filter(brand == "Samsung") %>% 
+  ggplot(aes(x = rating)) +
+  geom_histogram(aes(y = ..density..), col = "white", bins = 25) +
+  stat_function(
+    fun = dnorm,
+    args = list(
+      mean = samsung_stats$mean ,
+      sd =samsung_stats$sd
+    ),
+    col = "red"
+  )
+```
+
+
+
+#2a_Do you think the normal distribution provides a good model of these ratings?
+#looks quite good but could be slightly higher?
+
+
+
+#3 We can be more quantitative in comparing the distribution of top brand ratings with a normal distribution. You calculated the `mean()` and `sd()` of your distribution in an earlier question.
+
+#Use these values to calculate the *proportions* of ratings within one-, two- and three standard deviations of the mean. 
+#79% within 1sd
+#92% within 2sd
+#98% within 3sd
+```{r}
+samsung_ratings %>% 
+  filter(rating >= samsung_stats$mean - samsung_stats$sd) %>%
+  filter(rating <= samsung_stats$mean + samsung_stats$sd) %>%
+ # count() for sanity check 
+  summarise(prop_within_1sd = n() / nrow(samsung_ratings))
+  
+```
+
+```{r}
+samsung_ratings %>% 
+filter(rating >= samsung_stats$mean - (2*samsung_stats$sd)) %>%
+filter(rating <= samsung_stats$mean + (2*samsung_stats$sd)) %>%
+  summarise(prop_within_2sd = n() / nrow(samsung_ratings))
+```
+
+```{r}
+
+samsung_ratings %>% 
+filter(rating >= samsung_stats$mean - (3*samsung_stats$sd)) %>%
+filter(rating <= samsung_stats$mean + (3*samsung_stats$sd)) %>%
+  summarise(prop_within_3sd = n() / nrow(samsung_ratings))
+```
+
+
+#Compare these proportions with those you expect for a normal distribution.  
+
+
+```{r}
+
+pnorm(1) - pnorm(-1)
+pnorm(2) - pnorm(-2)
+pnorm(3) - pnorm(-3)
+```
+#This samsung_ratings proportions are better fits for the normal distribution at 2sd from the mean than 1sd and even better at 3sd from the mean
