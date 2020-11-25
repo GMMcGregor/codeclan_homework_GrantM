@@ -17,7 +17,6 @@ library(janitor)
 phones <- read_csv(here("data/20190928-items.csv")) %>% 
 clean_names()
 
-
 phones
 ```
 ```{r}
@@ -31,7 +30,15 @@ phones %>%
   count(brand)
 
 ```
-
+should have been this
+```{r}
+top_brand <- phones %>%
+  group_by(brand) %>%
+  summarise(count = n()) %>%
+  arrange(desc(count)) %>%
+  top_n(1)
+top_brand
+```
 
 #2_For your top brand, plot the distribution of phone ratings as a probability density, overlaying a fitted normal distribution.
 ```{r}

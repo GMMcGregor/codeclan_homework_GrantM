@@ -1,0 +1,61 @@
+---
+title: "Homework - CIs"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    df_print: paged
+    css: ../../../resources/note_styles.css
+  pdf_document: default
+---
+
+<div class="blame">
+author: "Del Middlemiss"<br>
+date: "30th August 2019"
+</div>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.align = 'center')
+```
+
+<hr>
+
+# MVP
+
+Now we'll go back to CI creation in the normal fashion. We'll take the `ames` data from the CIs lab earlier today and regard it now as a **sample**, we won't be drawing any smaller samples from within it. This is the usual situation in an analysis: you use all the data available to you!
+
+<br>
+
+* Load the data again, `clean_names()`, and re-familiarise yourself with it
+
+<br>
+
+* Investigate the distribution of `lot_area`. Is the distribution roughly normal? If not, what problems do you find?
+
+<br>
+
+* Compute and visualise a bootstrap sampling distribution for the `mean(lot_area)` of the sold houses.
+
+<br>
+
+* Use your bootstrap distribution to calculate a $95\%$ CI for `mean(lot_area)`, and visualise it on the distribution
+
+<br>
+
+* You would like to know the `mean(lot_area)` of the sold houses with higher confidence. Calculate the $99\%$ CI for this variable (you can re-use your bootstrap distribution from above). Is it narrower or broader than the $95\%$ CI? Does that make sense?
+
+<br>
+
+* Calculate the point estimate of the `mean(lot_area)`
+
+<hr>
+
+# Extension
+
+<br>
+
+* Calculate a point estimate and $95\%$ CI for the proportion of houses in the data built before 1920.  Does the number of `reps` you use matter? [Investigate `reps` from $200$ up to $50000$, memory of your laptop permitting].
+<br><br>
+[**Hint** - the current implementation of `calculate(stat = "prop")` in `infer` is slow! You can get around this by treating the mean in this way: add a new column via `mutate(before_1920 = as.numeric(year_built < 1920))` and then `calculate(stat = "mean")` on this new column]
+
