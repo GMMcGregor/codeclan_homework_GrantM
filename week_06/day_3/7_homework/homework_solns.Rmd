@@ -1,0 +1,225 @@
+---
+title: "Homework - CIs - Solutions"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    df_print: paged
+    css: ../../../styles.css
+  pdf_document: default
+---
+
+<div class="blame">
+author: "Del Middlemiss"<br>
+date: "30th August 2019"
+</div>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.align = 'center')
+```
+
+<hr>
+
+# MVP
+
+Now we'll go back to CI creation in the normal fashion. We'll take the `ames` data from the CIs lab earlier today and regard it now as a **sample**, we won't be drawing any smaller samples from within it. This is the usual situation in an analysis: you use all the data available to you!
+
+<br>
+
+* Load the data again, `clean_names()`, and re-familiarise yourself with it
+
+```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(janitor)
+library(infer)
+```
+```{r}
+ames <- read_csv("data/ames.csv")
+ames <- clean_names(ames)
+glimpse(ames)
+```
+
+<br>
+
+* Investigate the distribution of `lot_area`. Is the distribution roughly normal? If not, what problems do you find?
+
+```{r}
+ames %>%
+  ggplot(aes(x = lot_area)) +
+  geom_histogram(col = "white", bins = 30)
+
+ames %>%
+  ggplot(aes(x = lot_area)) +
+  geom_boxplot()
+```
+The main problem is a significant number of high outliers, the distribution is very right-skewed.
+
+<br>
+
+* Compute and visualise a bootstrap sampling distribution for the `mean(lot_area)` of the sold houses.
+
+```{r}
+bootstrap_distn <- ames %>%
+  specify(response = lot_area) %>%
+  generate(reps = 10000, type = "bootstrap") %>%
+  calculate(stat = "mean")
+
+bootstrap_distn %>%
+  visualise(bins = 30)
+```
+
+<br>
+
+* Use your bootstrap distribution to calculate a $95\%$ CI for `mean(lot_area)`, and visualise it on the distribution
+
+```{r}
+lot_area_ci95 <- bootstrap_distn %>%
+  get_ci(level = 0.95, type = "percentile")
+lot_area_ci95
+
+bootstrap_distn %>%
+  visualise(bins = 30) +
+  shade_ci(endpoints = lot_area_ci95)
+```
+
+<br>
+
+* You would like to know the `mean(lot_area)` of the sold houses with higher confidence. Calculate the $99\%$ CI for this variable (you can re-use your bootstrap distribution from above). Is it narrower or broader than the $95\%$ CI? Does that make sense?
+
+```{r}
+lot_area_ci99 <- bootstrap_distn %>%
+  get_ci(level = 0.99, type = "percentile")
+lot_area_ci99
+
+bootstrap_distn %>%
+  visualise(bins = 30) +
+  shade_ci(endpoints = lot_area_ci99)
+```
+It is broader than the $95\%$ CI. We haven't increased sample size, so the only way to increase confidence is by increasing the width of the interval. Again, by analogy: to be more confident of catching the fish, you need to use a bigger net.
+
+<br>
+
+* Calculate the point estimate of the `mean(lot_area)`
+
+```{r}
+# either
+ames %>%
+  summarise(point_est = mean(lot_area))
+
+# or
+bootstrap_distn %>%
+  summarise(point_est = mean(stat))
+```
+
+<hr>
+
+# Extension
+
+<br>
+
+* Calculate a point estimate and $95\%$ CI for the proportion of houses in the data built before 1920.  Does the number of `reps` you use matter? [Investigate `reps` from $200$ up to $50000$, memory of your laptop permitting].
+<br><br>
+[**Hint** - the current implementation of `calculate(stat = "prop")` in `infer` is slow! You can get around this by treating the mean in this way: add a new column via `mutate(before_1920 = as.numeric(year_built < 1920))` and then `calculate(stat = "mean")` on this new column]
+
+```{r}
+ames_before_1920 <- ames %>%
+  mutate(before_1920 = as.numeric(year_built < 1920))
+```
+
+To investigate the effect of number of `reps`, let's generate five different bootstrap sampling distributions
+
+```{r}
+bootstrap_distn_200 <- ames_before_1920 %>%
+  specify(response = before_1920) %>%
+  generate(reps = 200, type = "bootstrap") %>%
+  calculate(stat = "mean")
+
+bootstrap_distn_1000 <- ames_before_1920 %>%
+  specify(response = before_1920) %>%
+  generate(reps = 1000, type = "bootstrap") %>%
+  calculate(stat = "mean")
+
+bootstrap_distn_10000 <- ames_before_1920 %>%
+  specify(response = before_1920) %>%
+  generate(reps = 10000, type = "bootstrap") %>%
+  calculate(stat = "mean")
+
+bootstrap_distn_30000 <- ames_before_1920 %>%
+  specify(response = before_1920) %>%
+  generate(reps = 30000, type = "bootstrap") %>%
+  calculate(stat = "mean")
+
+bootstrap_distn_50000 <- ames_before_1920 %>%
+  specify(response = before_1920) %>%
+  generate(reps = 50000, type = "bootstrap") %>%
+  calculate(stat = "mean")
+```
+
+Calculate point estimates:
+
+```{r}
+point_est <- ames_before_1920 %>%
+  summarise(point_est = mean(before_1920))
+point_est
+
+# or
+point_est <- bootstrap_distn_50000 %>%
+  summarise(point_est = mean(stat))
+point_est
+```
+
+Now calculate CI and visualise each distribution
+
+```{r}
+before_1920_ci95_200 <- bootstrap_distn_200 %>%
+  get_ci(level = 0.95, type = "percentile")
+before_1920_ci95_200
+
+bootstrap_distn_200 %>%
+  visualise(bins = 30) +
+  shade_ci(endpoints = before_1920_ci95_200)
+```
+
+```{r}
+before_1920_ci95_1000 <- bootstrap_distn_1000 %>%
+  get_ci(level = 0.95, type = "percentile")
+before_1920_ci95_1000
+
+bootstrap_distn_1000 %>%
+  visualise(bins = 30) +
+  shade_ci(endpoints = before_1920_ci95_1000)
+```
+
+```{r}
+before_1920_ci95_10000 <- bootstrap_distn_10000 %>%
+  get_ci(level = 0.95, type = "percentile")
+before_1920_ci95_10000
+
+bootstrap_distn_10000 %>%
+  visualise(bins = 30) +
+  shade_ci(endpoints = before_1920_ci95_10000)
+```
+
+```{r}
+before_1920_ci95_30000 <- bootstrap_distn_30000 %>%
+  get_ci(level = 0.95, type = "percentile")
+before_1920_ci95_30000
+
+bootstrap_distn_30000 %>%
+  visualise(bins = 30) +
+  shade_ci(endpoints = before_1920_ci95_30000)
+```
+
+```{r}
+before_1920_ci95_50000 <- bootstrap_distn_50000 %>%
+  get_ci(level = 0.95, type = "percentile")
+before_1920_ci95_50000
+
+bootstrap_distn_50000 %>%
+  visualise(bins = 30) +
+  shade_ci(endpoints = before_1920_ci95_50000)
+```
+
+CIs calculated using $10,000$ bootstrap repetitions and upward seem more reliable than those using fewer resamplings. You should always test the sensitivity of your calculated CI to number of `reps`!
+

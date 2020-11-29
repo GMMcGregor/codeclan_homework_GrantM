@@ -1,0 +1,172 @@
+---
+title: "Hypothesis tests & probability - homework"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    df_print: paged
+    css: ../../../styles.css
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.align = 'center')
+```
+
+<hr>
+
+# MVP
+
+## Hypothesis testing - practical
+
+You work for an animal conservation organisation and are looking to do some investigating into some of the animals to provide evidence for some projects you are looking to run. 
+
+In this homework we'll use the `msleep` data set provided in the `ggplot` package. It concerns the sleeping patterns of various types of mammal.
+
+```{r, message = FALSE}
+library(tidyverse)
+data(msleep)
+```
+
+* Explore the dataset and familiarise yourself with it.
+
+* Jabberwockies sleep for around $7$ hours a night, on average. Perform an appropriate statistical test to determine whether the mean `sleep_total` in the sampled population of animal types differs from the typical value for jabberwockies.
+
+* Perform an appropriate statistical test to determine whether omnivores sleep for significantly longer than herbivores, on average.
+
+* Perform an appropriate statistical test to determine whether the proportion of domesticated animal types in the population of animal types is greater than $5\%$.
+<br>
+[**Hint** - think about creating an `is_domesticated` variable for the analysis]
+
+## Hypothesis testing - interpretation
+
+### Defining the Hypothesis 
+For the following three business problems write out $H_0$ and $H_a$ in both mathematical notation and in words. Also state the method you would use to generate the null distribution (bootstrap, permutation or simulation). 
+
+1. You work for a independent coffee shop. You've performed a small survey in the local town and found that 40% of the people you randomly asked were aware of your shop in the town. You then conduct a marketing campaign by flyering local venues and targeting advertisements on social media. Finally you conduct a second small random survey in the town, asking if people are aware of your coffee shop. You want to test the hypothesis that the campaign has significantly increased awareness of the shop. 
+
+2. You work for a website design company and have performed an **A/B test** on the position of a banner on a website page promoting a particular item. 
+<br><br>
+<div class='emphasis'>
+**A/B testing** 
+A method comparing two versions of a web page, email, flyer or other marketing device against each other to determine which version performs better. As it is essentially a controlled experiment, the design should try to ensure that the groups experiencing both versions of the marketing device are need to establish that the two groups are equivalent and representative of the population.
+</div>
+<br><br>
+In the current test, the first group continues to be shown the banner at the right hand side of the webpage (its usual position) while the test group is shown it at the top of the page. The performance metric we will be testing is click through rate (CTR) on the banner, i.e. what proportion of users click on the banner 
+
+3. You work as an analyst for a car manufacturing company - they have specific standards they must meet for standards and regulation purposes. You have been asked to check the quality control of the manufacture of a particular car part. The part must have a width of 145mm, with a small (given) level of tolerance. You have been given data on a sample of $1,000$ parts produced over the period of a week. 
+
+### Interpreting the results
+For the 3 business problems stated above, imagine we performed you got the following p-values (with the given significance levels) write out your interpretation of the results. 
+
+1. **Coffee shop problem**. Significance level: 0.05, calculated $p$-value: 0.07
+
+2. **Website company problem**. Significance level: 0.01, $p$-value: 0.006
+
+3. **Manufacturing company problem**. Significance level: 0.05, $p$-value: 0.55
+
+# Extension
+
+## Market Basket Analysis
+
+**Association rule mining** is regularly used by retailers to find associations between products that people purchase, perhaps for an online retailer, the items that people put together in their 'baskets', and in a bricks and mortar retailer, the items purchased together in a single transaction. The aim is to find recurring patterns in the transactions which the retailer can then use to do targeted marketing of items, seeking to increase 'cross sales'. Rules mining of this sort can also be used in other industries beyond retail to identify patterns in data. 
+
+**Market basket analysis (MBA)** uses association rule mining. It looks at the association of items occurring in a **single basket**, and so won't look at your purchases over time, but only items that are purchased together in a single purchase (i.e. a 'basket'). As a good example, you may have seen the 'Frequently Bought Together' section on Amazon (and other sites), which looks at items you've got in your basket and suggests items that other people commonly have in their baskets when they also have these items:
+
+```{r, echo=FALSE,, out.width = '60%', fig.align="center" }
+knitr::include_graphics("images/freq_bought_together.jpeg")
+```
+
+MBA differs from recommendation algorithms because the association rules look only at items bought together in a single purchase, they don't use any characteristics of the purchaser to profile them (e.g. 'Based on purchases by people like you, you may also like...') or how their purchases vary over time. The association rules used for MBA use the probability principles we learned on Monday this week. 
+
+## Association rules 
+
+The rules obtained by MBA have three concepts associated with them, as follows:
+
+**Support**  
+The probability of items in the rule being purchased together:
+
+e.g. $\textrm{sup}(A \rightarrow B) = P(\textrm{A and B being purchased together}) = \frac{\textrm{number of transactions involving A and B}}{\textrm{total number of transactions}}$
+
+Support also has meaning for single items:
+
+e.g. $\textrm{sup}(A) = P(A) = \frac{\textrm{number of transactions involving A}}{\textrm{total number of transactions}}$
+
+**Confidence**  
+The proportion of purchases of $A$ where $B$ has also been purchased:
+
+e.g. $\textrm{conf}(A \rightarrow B) = \frac{\textrm{P(A and B being purchased together)}}{\textrm{P(A being purchased)}}$
+
+**Lift**  
+Increase in sales of $A$ when sold with $B$
+
+$\textrm{lift}(A \rightarrow B) = \frac{\textrm{sup}(A \rightarrow B)}{\textrm{sup}(A) \times \textrm{sup}(B)}$
+
+If $\textrm{sup}(A \rightarrow B) = \textrm{sup}(A) \times \textrm{sup}(B)$ then this means $P(A \textrm{ and } B) = P(A) \times P(B)$. We know from the probability lesson earlier in the week that this means the purchase of $A$ and $B$ are independent events. This may help with our interpretation of lift values:
+
+* $\textrm{lift}(A \rightarrow B) \gt 1$ - items $A$ and $B$ are more likely to be bought together 
+* $\textrm{lift}(A \rightarrow B) = 1$ - no correlation between items $A$ and $B$ being bought together
+* $\textrm{lift}(A \rightarrow B) < 1$ - items $A$ and $B$ are unlikely to be bought together
+
+A and B don't need to be single items, they could be sets of items (itemsets) e.g. A = {TV, DVD player}, B = {TV stand}. 
+
+## Using the rules 
+
+Once we have calculated the rules we can use them to gain insights about items/itemsets. 
+
+For example, if for items $A$ and $B$ the corresponding rule $(A \rightarrow B)$ has a low support but a lift greater than $1$ then we can say that when $A$ is purchased $B$ is often purchased with it (high lift), but such transactions don't happen all that frequently (low support). 
+
+The **apriori algorithm** is often used as a way of selecting 'interesting' rules. It will calculate all the support, confidence and lift values for the item/itemset combinations of your dataset and will return those with support values greater than a pre-defined threshold value set by the user. 
+
+## Homework exercise
+
+Let's load in some transaction data which has details on the items purchased in each transaction (where each transaction is uniquely identified by the `InvoiceNo` variable). 
+
+```{r}
+transactions <- read_csv("data/online_retail_subset.csv")
+head(transactions, 20)
+```
+
+## Association rules 
+
+For the first section we are interested in the purchase of two particular items:
+
+* item $A$ - 'HEART OF WICKER SMALL' (`StockCode` $22469$) 
+* item $B$ - 'LARGE CAKE TOWEL PINK SPOTS' (`StockCode` $21110$)
+
+1. Calculate the support for item $A$ (this will be the support for a single item)
+
+2. Calculate the support and confidence for rule $(A \rightarrow B)$. 
+
+3. Calculate the lift for $(A \rightarrow B)$
+[**Hint** - you will need to calculate the support for $B$] 
+
+## Apriori algorithm 
+
+Read up on the `arules` and `arulesViz` packages, which make use of the 'apriori' algorithm http://www.salemmarafi.com/code/market-basket-analysis-with-r/comment-page-1/
+
+Use these packages to play around, applying the apriori algorithm to the `transactions` dataset we have. 
+
+To use the `arules` package we need the data to be a special type of 'transactions' object. We do this by reading in the data using `read.transactions()` function from the `arules` package. We have done this for you below (for more information on this type of transactions object see the helpfile `?transactions`):
+
+```{r, message = FALSE}
+library(arules)
+library(arulesViz)
+```
+
+```{r}
+transactions_reformat <- transactions %>%
+  select(InvoiceNo, Description) %>%
+  na.omit()
+
+write_csv(transactions_reformat, "transactions_reformat.csv")
+
+apriori_format <- read.transactions("transactions_reformat.csv", format = "single", sep = ",", header = TRUE, cols = c("InvoiceNo", "Description"))
+
+inspect(head(apriori_format))
+```
+
+Now you're all set to play around with `arules` and `arulesViz`. 
+
+**Warning about run time/memory usage:** if the minimum support is set too low for the dataset, then the algorithm will try to create an extremely large set of itemsets/rules. This will result in very long run times and the process may eventually run out of memory. You can either start by trying a reasonably high support (for this dataset, we would suggest starting at $1%$ and then systematically lower the support if don't see any results). There is also an argument `maxtime` which can be used to prevent long run times (more information on that in the `apriori` user document [here](https://rdrr.io/cran/arules/man/apriori.html)). 

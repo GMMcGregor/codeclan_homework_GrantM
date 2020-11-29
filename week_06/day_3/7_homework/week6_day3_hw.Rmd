@@ -34,6 +34,7 @@ ames_lot_area_plot <- ames_house_data %>%
 
 ames_lot_area_plot
 ```
+
 ```{r}
 summary_popn <- ames_house_data %>%
   summarise(
@@ -54,6 +55,9 @@ infer_resample <- ames_house_data %>%
   specify(response = lot_area) %>%
   generate(reps = 5000, type = "bootstrap") %>%
   calculate(stat = "mean")
+
+infer_resample%>%
+  visualise(bins = 30)
   
 ```
 
