@@ -1,0 +1,168 @@
+---
+title: "Dates, times and time series homework"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    df_print: paged
+    css: ../../../styles.css
+  pdf_document: default
+---
+
+This homework is revision from today's class. We will practice what we've learned about dates, times, and time series.
+
+You'll need to copy and run the following code chunk for this homework:
+
+```{r, warning = FALSE, message = FALSE}
+library(dplyr)
+library(lubridate)
+library(tidyverse)
+library(tsibble)
+library(tsibbledata)
+library(feasts)
+
+date1 <- ymd_hms("2017-04-22 22:01:18")
+date2 <- ymd_hms("2001-11-07 10:09:56")
+```
+
+You'll also need to load the `nycflights13` package, which contains example time series weather data.     
+
+```{r, warning = FALSE, message = FALSE}
+library(nycflights13)
+      
+glimpse(nycflights123)
+
+
+```
+
+The `nycflights13` package contains five different datasets:
+
+* `airlines`: airline names
+* `airports`: metadata about airports
+* `flights`: on-time flight data for all flights that departed NYC
+* `planes`: plane metadata for plane tail-numbers
+* `weather`: hourly meteorological data
+
+
+
+# Dates and Times
+
+<br>
+**Question 1**  
+
+Extract the different components (year, month, mday, yday, wday) from the variable `date1`. Add the labels to the month and do not abbreviate the month labels. 
+
+<br>
+```{r}
+as_datetime(date1)
+year(date1)
+month(date1, label = TRUE, abbr =FALSE)
+mday(date1)
+yday(date1)
+wday(date1)
+
+```
+
+
+<br>
+**Question 2**  
+
+Add 14 days to your `date1` variable and store it in a variable called `next_fortnight`. 
+Take away 10 years from your `date2` variable, and store it in `previous_decade`. 
+
+<br>
+
+
+<br>
+**Question 3**  
+
+Create a variable called `this_year` which contains today's date. Then create an interval object which uses `this_year` and the `previous_decade` variable you made above. Store it in `interval_years`. 
+*Hint: you'll need to use lubridate::interval in order to get the right function, as tsibble has one too*  
+
+
+<br>
+
+
+<br>
+**Question 4**    
+
+Change the time zone of both your date variables to "America/New_York", and call them `nyc_date1` and `nyc_date2`. 
+
+<br>
+
+
+<br>
+**Question 5**  
+
+Use the `flights` data from the `nycflights13` dataset. Make a date-time column called `departure_date` from the `year, month, day, hour, and minute` variables in the `flights` tibble.
+
+<br>
+
+
+
+
+# Time series familiarity 
+
+
+<br>
+**Question 6**  
+
+Start with the `weather` data from the `nycflights13` package. Select all the variables related to temperature, humidity, and precipitation, and pick out the key and index variables. Have a look at your data, and write a small description of the time series you observe. 
+
+Here we can see that our data is collected in hourly format, with observations occuring every day. 
+
+<br>
+
+
+<br>
+**Question 7**  
+
+Change the weather data into a tsibble. Hint, look up in the notes where we suggest using `as_tsibble` function. You'll need to define an `index` and `key`.
+
+
+In order to create a time series tibble, remember you need to provide an *index* and a *key*. In our case, `time_hour` is the only column involving a date/date-time, and so this would be our index. A `tsibble` also requires a key, which defines individual observations that are tracked over time. In this example, the `origin` variable is the identifier, and therefore is our key. It is important to note that the duo of the index and key uniquely identifies each observation in a valid `tsibble`.   
+
+
+<br>
+
+
+<br>
+**Question 8**  
+
+Add a year and month column to your new tsibble weather data, and create a basic line plot which shows the temperature data from each airport over time. Have a think back to what you learned in visualisation week, and think about whether plotting the whole time series in one go is adequate here? Write down your suggestions for what could be done to make a better and more informative plot. 
+
+ We've provided the code below if you get totally stuck. 
+
+<details>
+<summary>**Code for the previous question if you got stuck making the tsibble**</summary>
+```{r}
+# create a time series tsibble with keys
+weather_tsbl <- weather %>%
+  as_tsibble(index = time_hour, key = origin)
+
+weather_tsbl
+```
+</details>
+
+
+<br>
+
+
+<br>
+**Question 9**  
+
+Choose an appropriate rolling window and calculate a moving average for your weather temperature data for each airport origin. Create a useful plot which overlays the original time series data and the rolling average data. Make sure the graph is easy for others to understand (*Hint: you might want to facet_wrap*). Finally, write a summary of why you chose the time window you did, and describe any trends you see. 
+
+
+<br>
+
+
+<br>
+**Question 10**  
+
+Downsample your data so that you plot daily temperature data for each airport, instead of hourly data. 
+
+
+<br>
+
