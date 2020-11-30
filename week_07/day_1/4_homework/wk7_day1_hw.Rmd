@@ -1,20 +1,9 @@
 ---
-title: "Dates, times and time series homework"
-output:
-  html_document:
-    toc: true
-    toc_float: true
-    number_sections: true
-    df_print: paged
-    css: ../../../styles.css
-  pdf_document: default
+title: "R Notebook"
+output: html_notebook
 ---
 
-This homework is revision from today's class. We will practice what we've learned about dates, times, and time series.
-
-You'll need to copy and run the following code chunk for this homework:
-
-```{r, warning = FALSE, message = FALSE}
+```{r}
 library(dplyr)
 library(lubridate)
 library(tidyverse)
@@ -26,32 +15,16 @@ date1 <- ymd_hms("2017-04-22 22:01:18")
 date2 <- ymd_hms("2001-11-07 10:09:56")
 ```
 
-You'll also need to load the `nycflights13` package, which contains example time series weather data.     
-
-```{r, warning = FALSE, message = FALSE}
+```{r}
 library(nycflights13)
-
-
 ```
 
-The `nycflights13` package contains five different datasets:
 
-* `airlines`: airline names
-* `airports`: metadata about airports
-* `flights`: on-time flight data for all flights that departed NYC
-* `planes`: plane metadata for plane tail-numbers
-* `weather`: hourly meteorological data
-
-
-
-# Dates and Times
-
-<br>
 **Question 1**  
 
 Extract the different components (year, month, mday, yday, wday) from the variable `date1`. Add the labels to the month and do not abbreviate the month labels. 
 
-<br>
+
 ```{r}
 as_datetime(date1)
 year(date1)
@@ -62,40 +35,68 @@ wday(date1)
 
 ```
 
-
-<br>
 **Question 2**  
 
 Add 14 days to your `date1` variable and store it in a variable called `next_fortnight`. 
 Take away 10 years from your `date2` variable, and store it in `previous_decade`. 
 
-<br>
+```{r}
+next_fortnight <- date1 + days(14)
+next_fortnight
+```
 
+```{r}
+previous_decade <- date2 - years(10)
+previous_decade
+```
 
-<br>
 **Question 3**  
 
 Create a variable called `this_year` which contains today's date. Then create an interval object which uses `this_year` and the `previous_decade` variable you made above. Store it in `interval_years`. 
 *Hint: you'll need to use lubridate::interval in order to get the right function, as tsibble has one too*  
 
 
-<br>
+```{r}
+this_year <- today()
+this_year
+
+interval_years <- lubridate::interval(this_year, previous_decade)
+interval_years
+```
 
 
-<br>
+
 **Question 4**    
 
 Change the time zone of both your date variables to "America/New_York", and call them `nyc_date1` and `nyc_date2`. 
 
-<br>
+```{r}
+nyc_date1 <- with_tz(date1, tzone = "America/New_York")
+                     
+nyc_date1
+
+  
+nyc_date2 <- with_tz(date2, tzone = "America/New_York")
+
+nyc_date2
+
+```
 
 
-<br>
 **Question 5**  
 
 Use the `flights` data from the `nycflights13` dataset. Make a date-time column called `departure_date` from the `year, month, day, hour, and minute` variables in the `flights` tibble.
 
-<br>
+```{r}
+nycflights13::flights
+```
+
+```{r}
+nycflights13::flights %>% 
+  mutate(departure_date = make_datetime(year, month, day, hour, minute))
+
+```
+
 
 
 
