@@ -191,7 +191,7 @@ domesticated_animals %>%
 to determine whether the proportion of domesticated animal types in the population of animal types is greater than $5\%$with significance level α=0.05).
 H0: πdomesticated - πnot_domesticated = 0
 Ha: πdomesticated - πnot_domesticated ≠ 0
-We treat is_domesticated as the response variable and sleep_total as the explanatory variable in this relationship, with ‘domesticated’ as the ‘success’ category.
+We treat is_domesticated as the response variable , with ‘domesticated’ as the ‘success’ category.
 
 
 #had mind meltdown trying to work this out so moved onto interpretation
@@ -206,8 +206,8 @@ ggplot(domesticated_animals, aes(x = domesticated_animals, fill = )) +
 calculate observed statistic
 ```{r}
 observed_stat <- domesticated_animals %>% 
-  specify(is_domesticated ~ vote, success = "domesticated") %>% 
-  calculate(stat = "diff in props", order = c("obama", "romney"))
+  specify(is_domesticated, success = "domesticated") %>% 
+  calculate(stat = "diff in props", order = c("domesticated", "not_domesticated"))
 
 observed_stat
 
@@ -231,6 +231,8 @@ H1: S2_campaign_awareness is greater than S1_capmaign_awareness
 H0: μcampaign_awareness(S1)−μcampaign_awareness(S2)=0
 Ha: μcampaign-awareness(S1)−μcampaign_awareness(S2)>0
 
+bootstrap
+
 
 
 2. You work for a website design company and have performed an **A/B test** on the position of a banner on a website page promoting a particular item. 
@@ -238,8 +240,6 @@ Ha: μcampaign-awareness(S1)−μcampaign_awareness(S2)>0
 <div class='emphasis'>
 **A/B testing** 
 A method comparing two versions of a web page, email, flyer or other marketing device against each other to determine which version performs better. As it is essentially a controlled experiment, the design should try to ensure that the groups experiencing both versions of the marketing device are need to establish that the two groups are equivalent and representative of the population.
-</div>
-<br><br>
 In the current test, the first group continues to be shown the banner at the right hand side of the webpage (its usual position) while the test group is shown it at the top of the page. The performance metric we will be testing is click through rate (CTR) on the banner, i.e. what proportion of users click on the banner 
 
 3. You work as an analyst for a car manufacturing company - they have specific standards they must meet for standards and regulation purposes. You have been asked to check the quality control of the manufacture of a particular car part. The part must have a width of 145mm, with a small (given) level of tolerance. You have been given data on a sample of $1,000$ parts produced over the period of a week. 
@@ -248,7 +248,10 @@ In the current test, the first group continues to be shown the banner at the rig
 For the 3 business problems stated above, imagine we performed you got the following p-values (with the given significance levels) write out your interpretation of the results. 
 
 1. **Coffee shop problem**. Significance level: 0.05, calculated $p$-value: 0.07
+p-value is greater than α so we lack sufficient evidence to reject H0 and so we fail to reject H0. Based on our sample, we do not have enough evidence that the new campaign has effected any positive increase in market awareness.
 
 2. **Website company problem**. Significance level: 0.01, $p$-value: 0.006
+p-value is less than α so reject H0 in favour of Ha. There is enough evidence in the sample to suggest that the sample is statistically significantly different from the null value.
 
 3. **Manufacturing company problem**. Significance level: 0.05, $p$-value: 0.55
+p-value is greater than α so lack sufficient evidence to reject H0 and fail to reject H0. Wwe do not have enough evidence that the new campaign has effected any positive increase in market awareness.
