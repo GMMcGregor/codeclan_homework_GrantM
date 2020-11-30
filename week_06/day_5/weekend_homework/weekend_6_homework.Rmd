@@ -197,9 +197,11 @@ We treat is_domesticated as the response variable , with ‘domesticated’ as t
 #had mind meltdown trying to work this out so moved onto interpretation
 visualise data
 ```{r}
-ggplot(domesticated_animals, aes(x = domesticated_animals, fill = )) +
-  geom_bar(position = "fill") +
-  coord_flip()
+null_distribution<- msleep %>% 
+  specify(response = is_domesticated, success = "domesticated") %>% 
+  hypothesize(null = "point", p = 0.12) %>% 
+  generate(reps = 10000, type = "simulate") %>% 
+  calculate(stat = "prop")
 ```
 
 
