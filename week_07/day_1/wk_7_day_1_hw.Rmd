@@ -196,7 +196,36 @@ nyc_weather %>%
 
 **Question 9**  
 
-Choose an appropriate rolling window and calculate a moving average for your weather temperature data for each airport origin. Create a useful plot which overlays the original time series data and the rolling average data. Make sure the graph is easy for others to understand (*Hint: you might want to facet_wrap*). Finally, write a summary of why you chose the time window you did, and describe any trends you see. 
+Choose an appropriate rolling window and calculate a moving average for your weather temperature data for each airport origin. 
+```{r}
+library(slider)
+
+weather_rolling <- nyc_weather %>% 
+  mutate(temp_moving_avg = slide_dbl(
+    .x = temp,
+    .f = ~ mean(., na.rm = TRUE),
+    .before = 1000,
+    .after = 1000
+    
+  )
+)
+
+weather_rolling
+```
+
+
+```{r}
+ggplot(weather_rolling) +
+  geom_line(aes(x = time_hour, y = temp), colour = "grey") +
+  geom_line(aes(x = time_hour, y = temp_moving_avg), colour = "red")
+```
+
+
+Create a useful plot which overlays the original time series data and the rolling average data. Make sure the graph is easy for others to understand (*Hint: you might want to facet_wrap*). 
+
+Do a facet_wrap() to illustrate rollng_temp_avg at each origin.
+
+Chose time_hour as it was more sensitive than month though day might have been  interesting to see.
 
 
 
