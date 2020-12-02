@@ -1,0 +1,150 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(lubridate)
+library(tsibble)
+library(tsibbledata)
+library(fable)
+```
+
+# Question 1  
+Load in the `nyc_bikes` data from the `tsibbledata` package. Have an initial look at it to see what you're working with. Create three new columns: one that stores only the year the bike was used, one that stores only the month the bike was used, and one that stores the date. Use the data stored in `start_time` to create these new columns. 
+
+```{r}
+nyc_bikes %>% 
+  select(start_time)
+```
+
+
+```{r}
+nyc_bikes <- nyc_bikes %>%
+  mutate(year_of_use = year(start_time)) %>% 
+  mutate(month_of_use =month(start_time)) %>% 
+  mutate(date_of_use = date(start_time)
+         )
+
+nyc_bikes
+
+```
+***
+
+# Question 2  
+Summarise the number of bike hire counts by month. Make a plot of this data. *Hint: remember that to group time series (`tsibble`) data, you need to use `index_by` instead of `group_by` before your summarise function. What does this plot tell you about the time series? 
+
+It is seasonal.
+
+Do you think this downsampled data would be adequate to build a forecast with?  
+possibly not.
+```{r}
+nyc_bikes %>% 
+  index_by(month_of_use)  %>% 
+  summarise(count = n()) %>% 
+  ggplot() +
+  geom_line(aes(x = month_of_use, y = count))
+```
+
+# Question 3  
+Now Summarise the number of bike hire counts by **date**. Make a plot of this new aggregated data. What does this plot tell you about the time series? 
+##There is a trend runnig through it roughly seasonal in order but the daily ranges are volatile. 
+
+Would this data be preferrable for time series forecasting compared to the monthly data?
+##Yes, more preferable as more represenratavtive of daily variation in count. 
+<br>
+```{r}
+nyc_bikes_by_date <- nyc_bikes %>% 
+  index_by(date_of_use)  %>% 
+  summarise(count = n()) 
+
+nyc_bikes_by_date
+```
+
+
+```{r}
+nyc_bikes_by_date <- nyc_bikes %>% 
+  index_by(date_of_use)  %>% 
+  summarise(count = n()) %>% 
+  ggplot() +
+  geom_line(aes(x = date_of_use, y = count))
+
+nyc_bikes_by_date
+```
+
+***
+
+# Question 4 
+Let's begin to build a model. For this, we will use the downsampled by date dataset we created above in question 3. 
+```{r}
+nyc_bikes_by_date <- nyc_bikes %>% 
+  index_by(date_of_use)  %>% 
+  summarise(count = n()) 
+ 
+```
+
+Let's begin to build a model. For this, we will test the `NAIVE`, `MEAN`, and `SNAIVE` model. 
+
+```{r}
+nyc_bikes_filled <- nyc_bikes_by_date %>%
+  tsibble::fill_gaps(count = as.integer(median(count)))
+```
+
+
+```{r}
+fit <- nyc_bikes_filled %>% 
+  model(
+    naive = NAIVE(date),
+    mean_model = MEAN(date),
+    snaive = SNAIVE(date)
+  
+        )
+
+fit
+```
+However, the first thing you'll notice when you try and build a model is that you get an error:
+>.data contains implicit gaps in time. You should check your data and convert implicit gaps into explicit missing values using `tsibble::fill_gaps()` if required.
+First, create a new tibble which uses the `fill_gaps()` function to fill in missing values. You haven't come across this in class, but you should be able to look it up and use it using the help. Think about what value you might want to fill the missing values with. Justify your choice.   
+*Hint: think back to our missing values lesson. Do you want to leave them blank? Or do you want to impute each day with the median, last observation carried forward, etc.*   
+Once you've done that, build your models.    
+
+# Question 5
+Now we have our model fit, build a forecast to predict bike use over the next four months. Plot your models alongside your data.  
+*Hint: forecast parameter would be roughly 120 (30 days x 4 months)*
+
+<br>
+```{r}
+forecast_1 <- fit %>% 
+  fabletools::forecast(h = 120)
+
+forecast_1
+```
+
+
+# Question 6 
+Test your model accuracy : choose a training data set from your main dataset, build a forecast on the training set, and then plot the training set forecast against the real data. Calculate model accuracy. 
+
+
+
+# Question 7
+
+
+Look at your forecast plots and accuracy values. Describe your results. Are your models a good fit for the data? If not, why not? 
+What would you suggest doing with the data if you were expected to present these back to a client? For example, would you ask for more data? Would you test a different model?
+
+
+
+# Question 8
+
+Make a simple ggplot (`geom_point`) which plots the **start** longitude and latitudes of each bike. Create a separate facet for each `bike_id`. Colour the dots in by month of use. What does this tell you about what month each bike was used most in?
+
+Do the same for the **end** longitude and latitudes. 
+
+
+# Question 9 
+
+Create an interactive leaflet plot which plots the start points of the city bikes. Ensure it has at least markers to denote start points (taken from the `nyc_bikes_spatial` data). Feel free to add any additional features you wish.   
+
+```
+

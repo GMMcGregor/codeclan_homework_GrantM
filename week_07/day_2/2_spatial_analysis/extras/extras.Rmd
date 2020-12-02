@@ -1,0 +1,427 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+Visit - https://console.cloud.google.com and sign up for a google cloud platform trial.
+
+https://www.littlemissdata.com/blog/maps
+
+
+
+```{r}
+library(spData)
+
+canterbury = nz %>% filter(Name == "Canterbury")
+canterbury_height = nz_height[canterbury, ]
+```
+
+
+The datasets cycle_hire and cycle_hire_osm, already attached in the spData package, provide a good example. Plotting them shows that they are often closely related but they do not touch, as shown in Figure 4.4, a base version of which is created with the following code below:
+
+```{r}
+plot(st_geometry(cycle_hire), col = "blue")
+plot(st_geometry(cycle_hire_osm), add = TRUE, pch = 3, col = "red")
+```
+
+We can check if any points are the same st_intersects() as shown below:
+```{r}
+any(st_touches(cycle_hire, cycle_hire_osm, sparse = FALSE))
+#> [1] FALSE
+```
+
+
+```{r}
+install.packages("rnaturalearthhires")
+library(rnaturalearthhires)
+
+world <- ne_countries(scale=50) #world map with 50m resolution
+
+This is illustrated in the code chunk below, which finds the distance between the geographic centroid of the Surrey region, and the geographic centroid of the Halifax region. 
+
+```{r}
+
+view(north_carolina)
+
+g1 <- north_carolina %>% 
+  filter(NAME == "Surry") %>%
+  st_centroid()
+
+g2 <- north_carolina %>%
+  filter(NAME == "Halifax") %>%
+  st_centroid()
+  
+
+distance_between <- st_distance(g1, g2, by_element = TRUE)
+```
+
+This tells us that the distance between the geographic centre of Surry is 272,556 metres. 
+
+
+```
+
+
+
+
+
+
+
+
+Let's make an airline route map. To make an informative map, we need to know locations of airports, and number of flights that went to that one. 
+
+
+```{r}
+library(nycflights13)
+airports
+flights
+
+delta <- "DL"
+flight_year <- 2013
+
+
+destinations <- flights %>%
+  filter(year == 2013, carrier == "DL") %>%
+  left_join(airports, by = c("dest" = "faa"))
+  group_by(dest) %>%
+  summarise(flight_numbers = n())
+
+destinations_summary
+
+flights
+airports
+# Next we need to know about the flights that went between each pair of airports
+
+flights_between <- flights %>%
+  filter(year == 2013, carrier == "DL") %>%
+  group_by(origin, dest) %>%
+  summarise(flight_numbers = n()) %>%
+  left_join(airports, by = c("origin" = "faa")) %>%
+  left_join(airports, by = c("dest" = "faa"))
+
+flights_between
+
+
+
+
+# 55 unique values, therefore delta only served these possible flight routes. 
+
+lines <- bind_rows(
+  flights_between %>%
+    select(origin, dest, lat.x, lon.x) %>%
+    rename(lat = lat.x, lon = lon.x), 
+  flights_between 
+)
+
+
+```
+
+
+
+
+
+
+
+
+# Spatial visualisation in geoR
+
+
+```{r}
+library(tidyverse)
+library(geoR)
+
+head(parana)
+view(parana)
+
+ggplot(data.frame(cbind(parana$coords, Rainfall = parana$data)))+
+  geom_point(aes(east, north, color = Rainfall), size = 2) +
+  coord_fixed(ratio = 1) +
+  scale_color_gradient(low = "blue", high = "orange") +
+  geom_path(data = data.frame(parana$border), aes(east, north)) +
+  theme_bw()
+
+```
+
+
+
+***
+
+# Spatial visualisations in `ggmap`
+
+The best interface for drawing maps in R (with `ggplot`) is actually `ggmap`. `ggmap` is an extension embedded within the `ggplot2` package. 
+
+> ggmap : A collection of functions to visualize spatial data and models on top of static maps from various online sources (e.g Google Maps and Stamen Maps). It includes tools common to those tasks, including functions for geolocation and routing
+
+
+
+```{r}
+library(ggmap)
+```
+
+
+`ggmap` is designed to work seamlessly with `ggplot2`. The main objects within the package are called `ggmap` objects, and these are actually `ggplot2` objects (which makes our lives much easier). Let's start by getting a map from the database. 
+
+
+One thing you have to do before using it is to enable google static map service, and to sign up for it. 
+
+Visit - https://console.cloud.google.com and sign up for a google cloud platform trial.
+
+```{r}
+
+
+our_map <- get_map("Edinburgh")
+```
+
+
+
+
+The fastest way to get going is with the `qmap` class, which stands for “quick map plot”. Play around with the different types of parameter calls to render various plot types.
+
+```{r}
+qmap(location = "boston university") 
+qmap(location = "boston university", zoom = 14) 
+qmap(location = "boston university", zoom = 14, source = "osm")
+
+```
+
+
+
+
+```{r}
+
+
+Exercise 1
+Set the default view to longitude -47.4, latitude 39.75 and zoom level 3.
+In addition, add a button that will scale back to the default view upon clicking it.
+Hint: use the icon() function from the shiny package to easily render an icon of your choice for the button.
+
+Exercise 2
+Add the lines that represent the storms traces to the map.
+
+Exercise 3
+Color each line according to the storm max wind.
+
+Exercise 4
+Add a legend to the colors you just added.
+
+Exercise 5
+Upon hovering over a line, change its weight to 10.
+
+Exercise 6
+Upon hovering over a line, show a label with the storm name.
+
+Exercise 7
+Upon clicking a line, show a pop-up with the storm minimum pressure.
+
+
+```{r, eval = FALSE}
+# 1. 
+leaflet() %>%
+  setView(lng = -47.4, lat = 39.75, zoom = 3) %>%
+  addTiles() %>%
+  addEasyButton(
+    easyButton(
+      icon = shiny::icon("home"),
+      title= "Reset Zoom",
+      onClick = JS(
+        c("function(btn, map) {map.setView(new L.LatLng(39.75, -47.4), 3);}")
+      )
+    )
+  )
+```
+
+
+```{r}
+
+#2. 
+leaflet(data = atlStorms2005) %>%
+  setView(lng = -47.4, lat = 39.75, zoom = 3) %>%
+  addTiles() %>%
+  addEasyButton(
+    easyButton(
+      icon = shiny::icon("home"),
+      title= "Reset Zoom",
+      onClick = JS(
+        c("function(btn, map) {map.setView(new L.LatLng(39.75, -47.4), 3);}")
+      )
+    )
+  ) %>%
+  addPolylines()
+
+
+
+
+# 3. 
+colors_palette <- colorNumeric(
+  palette = rev(x = heat.colors(nrow(atlStorms2005))),
+  domain = range(atlStorms2005$MaxWind)
+)
+
+leaflet(data = atlStorms2005) %>%
+  setView(lng = -47.4, lat = 39.75, zoom = 3) %>%
+  addTiles() %>%
+  addEasyButton(
+    easyButton(
+      icon = shiny::icon("home"),
+      title= "Reset Zoom",
+      onClick = JS(
+        c("function(btn, map) {map.setView(new L.LatLng(39.75, -47.4), 3);}")
+      )
+    )
+  ) %>%
+  addPolylines(
+    color = ~colors_palette(MaxWind),
+    opacity = 0.65
+  )
+
+
+
+
+
+# 4. 
+
+leaflet(data = atlStorms2005) %>%
+  setView(lng = -47.4, lat = 39.75, zoom = 3) %>%
+  addTiles() %>%
+  addEasyButton(
+    easyButton(
+      icon = shiny::icon("home"),
+      title= "Reset Zoom",
+      onClick = JS(
+        c("function(btn, map) {map.setView(new L.LatLng(39.75, -47.4), 3);}")
+      )
+    )
+  ) %>%
+  addPolylines(
+    color = ~colors_palette(MaxWind),
+    opacity = 0.65
+  ) %>%
+  addLegend(pal = colors_palette, values = ~MaxWind)
+
+
+
+# 5. 
+
+leaflet(data = atlStorms2005) %>%
+  setView(lng = -47.4, lat = 39.75, zoom = 3) %>%
+  addTiles() %>%
+  addEasyButton(
+    easyButton(
+      icon = shiny::icon("home"),
+      title= "Reset Zoom",
+      onClick = JS(
+        c("function(btn, map) {map.setView(new L.LatLng(39.75, -47.4), 3);}")
+      )
+    )
+  ) %>%
+  addPolylines(
+    color = ~colors_palette(MaxWind),
+    opacity = 0.65,
+    highlightOptions = highlightOptions(weight = 10)
+  ) %>%
+  addLegend(pal = colors_palette, values = ~MaxWind)
+
+
+
+#6. 
+leaflet(data = atlStorms2005) %>%
+  setView(lng = -47.4, lat = 39.75, zoom = 3) %>%
+  addTiles() %>%
+  addEasyButton(
+    easyButton(
+      icon = shiny::icon("home"),
+      title= "Reset Zoom",
+      onClick = JS(
+        c("function(btn, map) {map.setView(new L.LatLng(39.75, -47.4), 3);}")
+      )
+    )
+  ) %>%
+  addPolylines(
+    color = ~colors_palette(MaxWind),
+    opacity = 0.65,
+    highlightOptions = highlightOptions(weight = 10),
+    label = ~Name
+  ) %>%
+  addLegend(pal = colors_palette, values = ~MaxWind)
+
+
+# 7. 
+leaflet(data = atlStorms2005) %>%
+  setView(lng = -47.4, lat = 39.75, zoom = 3) %>%
+  addTiles() %>%
+  addEasyButton(
+    easyButton(
+      icon = shiny::icon("home"),
+      title= "Reset Zoom",
+      onClick = JS(
+        c("function(btn, map) {map.setView(new L.LatLng(39.75, -47.4), 3);}")
+      )
+    )
+  ) %>%
+  addPolylines(
+    color = ~colors_palette(MaxWind),
+    opacity = 0.65,
+    highlightOptions = highlightOptions(weight = 10),
+    label = ~Name,
+    popup = ~paste("Min Press.", MinPress)
+  ) %>%
+  addLegend(pal = colors_palette, values = ~MaxWind)
+
+
+# 8. 
+my_leaflet <- leaflet(data = atlStorms2005) %>%
+  setView(lng = -47.4, lat = 39.75, zoom = 3) %>%
+  addTiles() %>%
+  addEasyButton(
+    easyButton(
+      icon = shiny::icon("home"),
+      title= "Reset Zoom",
+      onClick = JS(
+        c("function(btn, map) {map.setView(new L.LatLng(39.75, -47.4), 3);}")
+      )
+    )
+  ) %>%
+  addPolylines(
+    color = ~colors_palette(MaxWind),
+    opacity = 0.65,
+    highlightOptions = highlightOptions(weight = 10),
+    label = ~Name,
+    popup = ~paste("Min Press.", MinPress)
+  ) %>%
+  addLegend(pal = colors_palette, values = ~MaxWind)
+```
+
+
+
+
+
+
+
+
+
+```{r}
+
+install.packages(c("devtools", "mapproj", "tidyverse", "gtools"))
+devtools::install_github("marcusvolz/strava")
+
+library(strava)
+library(tidyverse)
+library(gtools)
+
+data <- process_data("~/Desktop/export_6391504/activities")
+
+dim(data)
+
+plot_facets(data)
+
+plot_map(data, lon_min = 144.9, lon_max = 145.73, lat_min = -38.1, lat_max = -37.475)
+
+```
+
+
+
+
+
+
+
+

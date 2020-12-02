@@ -147,7 +147,9 @@ Change the weather data into a tsibble. Hint, look up in the notes where we sugg
 
 
 ```{r}
-as_tsibble(nyc_weather, key = origin, index = time_hour)
+weather_tsibble <- nyc_weather %>% 
+  as_tsibble( key = origin, index = time_hour)
+weather_tsibble
 ```
 
 
@@ -158,7 +160,7 @@ In order to create a time series tibble, remember you need to provide an *index*
 Add a year and month column to your new tsibble weather data, 
 
 ```{r}
-nyc_weather <- nyc_weather %>% 
+weather_tsibble <- weather_tsibble %>% 
     mutate(year = year(time_hour), month = month(time_hour))
 
 nyc_weather
@@ -217,7 +219,10 @@ weather_rolling
 ```{r}
 ggplot(weather_rolling) +
   geom_line(aes(x = time_hour, y = temp), colour = "grey") +
-  geom_line(aes(x = time_hour, y = temp_moving_avg), colour = "red")
+  geom_line(aes(x = time_hour, y = temp_moving_avg), colour = origin)+
+   facet_wrap(~ origin) + 
+  ylab("temp") + 
+  xlab("time_hour")
 ```
 
 

@@ -1,0 +1,55 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+
+Another option you have where you have two models that are closely working, sometimes averaging them together can produce a better result. In this particular case, the `snaive` model method is also doing a good job, so you could create an averaged model of the `snaive` and `arima`. 
+
+
+<blockquote class='task'>
+**Task - 15 mins** 
+
+Go back to your beer dataset. Create a new `mable` which contains the model fit of the `arima` model, the `snaive` model, and one that averages the two of these models. 
+
+Then forecast 2 years in the future, and check the accuracy of your model. 
+
+<br> 
+
+<details>
+<summary>**Answers**</summary>
+
+```{r, eval = FALSE}
+# run the model on the training set 
+averaged_models_fit <- beer %>%
+  model(
+    arima = ARIMA(Beer),
+    snaive = SNAIVE(Beer)) %>%
+  mutate(avg_model = (arima + snaive) / 2 )
+
+averaged_models_fit
+
+# create the forecast
+forecast_avg_test <- averaged_models_fit %>% 
+  fabletools::forecast(h = 8)
+  
+# plot this 
+forecast_avg_test %>%
+  autoplot(beer, level = NULL) 
+
+# check the accuracy 
+
+accuracy_all_models <- fabletools::accuracy(forecast_avg_test, beer)
+
+beer
+accuracy_all_models %>% 
+  select(-.type) %>%
+  arrange(RMSE)
+
+```
+</details>
+</blockquote>
+
+
+
