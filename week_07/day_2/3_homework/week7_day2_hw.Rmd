@@ -89,6 +89,8 @@ Let's begin to build a model. For this, we will test the `NAIVE`, `MEAN`, and `S
 ```{r}
 nyc_bikes_filled <- nyc_bikes_by_date %>%
   tsibble::fill_gaps(count = as.integer(median(count)))
+
+nyc_bikes_filled
 ```
 
 
@@ -123,7 +125,32 @@ forecast_1
 
 
 # Question 6 
-Test your model accuracy : choose a training data set from your main dataset, build a forecast on the training set, and then plot the training set forecast against the real data. Calculate model accuracy. 
+Test your model accuracy : 
+-choose a training data set from your main dataset, 
+-build a forecast on the training set, and then 
+-plot the training set forecast against the real data. 
+-Calculate model accuracy. 
+
+
+
+Train - test 75%:25% total range is jan18-jan19 therefore  train jan18-sep18 train and oct18-dec18 test
+
+```{r}
+Training set from  2018-01-01 to 2018-09-30
+```{r}
+train <- nyc_bikes_filled %>% 
+  filter_index("1992 Q1" ~ "2006 Q4")
+
+fit_train <- train %>% 
+  model(
+    mean_model = MEAN(Beer),
+    arima = ARIMA(Beer),
+    snaive = SNAIVE(Beer)
+  )
+```
+
+
+
 
 
 
