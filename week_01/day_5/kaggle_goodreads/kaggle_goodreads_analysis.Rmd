@@ -4,8 +4,8 @@ output: html_notebook
 ---
 
 ```{r}
-library(tidyverse
-        )
+library(tidyverse)
+library(janitor)
 ```
 
 #  describe/summarise at least 5 things about this dataset -Be prepared to share one of your findings on Monday!
@@ -15,26 +15,25 @@ library(tidyverse
 kaggle_goodreads_books <- read_csv("book_data/books.csv")
 kaggle_goodreads_books
 ```
+
 8472 rows with 12 columns
 ```{r}
-dim(kaggle_goodreads_books)
+glimpse(kaggle_goodreads_books)
 ```
 
-```{r}
-names(kaggle_goodreads_books)
-```
+
 
 
 ```{r}
 kaggle_goodreads_books %>% 
-  arrange(desc(ratings_count))
+  arrange(ratings_count)
 ```
 
 
 
 ```{r}
 kaggle_goodreads_books %>% 
-  arrange(desc(text_reviews_count))
+  arrange(text_reviews_count)
 ```
 
 ```{r}
@@ -53,9 +52,7 @@ group languages
 kaggle_goodreads_books %>% 
   filter(!is.na(language_code)) %>% 
   group_by(language_code) %>% 
-  summarise(
-    count = n()
-  ) %>% 
+  summarise(count = n()) %>% 
   arrange(desc(count)) %>% 
   #trying to change en-US to eng
   mutate(language_code, "en-US" = "eng")
@@ -70,9 +67,7 @@ kaggle_goodreads_books %>%
 kaggle_goodreads_books %>% 
   filter(!is.na(authors)) %>% 
   group_by(authors) %>% 
-  summarise(
-    count = n()
-  ) %>% 
+  summarise(count = n()) %>% 
   arrange(desc(count))
 ```
 ```{r}
