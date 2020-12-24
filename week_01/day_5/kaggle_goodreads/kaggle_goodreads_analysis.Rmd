@@ -46,7 +46,7 @@ group languages
 ```
 # group languages and order descending
 # next step would be to rename all variations of English to get total value 
-# then to invesitgate within this English group as with other language groups
+# then to investigate within this English group as with other language groups
 
 ```{r}
 kaggle_goodreads_books %>% 
