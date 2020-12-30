@@ -1,0 +1,88 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+```{r}
+library(tidyverse)
+```
+
+
+```{r}
+tidy_meteorite_landings <- read_csv("../data/clean_data/tidy_meteorite_landings.csv")
+
+tidy_meteorite_landings
+```
+
+#2. Find the names and years found for the 10 largest meteorites in the data.
+
+```{r}
+top_ten_by_mass <- tidy_meteorite_landings %>% 
+  arrange(desc(mass_g)) %>% 
+  head(n=10) %>% 
+  select(name, mass_g, year)
+
+  top_ten_by_mass
+```
+
+#3. Find the average mass of meteorites that were recorded falling, vs. those which were just found.
+
+#filter falling versus found
+then find mean of each
+
+```{r}
+tidy_meteorite_landings %>% 
+  filter(fall == "Fell") %>% 
+    summarise(mean(mass_g))
+              
+```
+
+```{r}
+tidy_meteorite_landings %>% 
+  filter(fall == "Found") %>% 
+    summarise(mean(mass_g))
+```
+
+example solution
+```{r}
+tidy_meteorite_landings %>% 
+  group_by(fall) %>% 
+  summarise(
+    avg_mass = mean(mass_g)
+  )
+```
+
+
+#4. Find the number of meteorites in each year, for every year since 2000.
+group number of meteorites per year since 2000 and summarise
+
+```{r}
+tidy_meteorite_landings
+```
+
+```{r}
+tidy_meteorite_landings %>% 
+  group_by(year) %>% 
+  count() %>% 
+  filter(year >= 2000)
+
+```
+
+example solution
+```{r}
+tidy_meteorite_landings %>%
+  filter(year >= 2000) %>% 
+  group_by(year) %>% 
+  summarise(n = n())
+
+```
+
+
+## The project structure
+
+1. Make sure your use an RStudio Project.
+2. Make a repo on GitHub and commit your code to this repo regularly.
+3. It is up to you how to store your code and data. Make sure it is clear for others using the project.
+
+## The README.md file
+
+Make a plain text file called `README.md`. In this file we just want you to describe the structure of your project, and explain what each piece of code you have written does.

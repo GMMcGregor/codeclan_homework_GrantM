@@ -12,19 +12,16 @@ output: html_notebook
 
 ## The .R file
 
-
-
 #1. Read the data into R
 ```{r}
 library(tidyverse)
+library(janitor)
+library(assertr)
 ```
 
 ```{r}
-meteorite_landings <- read_csv("weekend_homework/meteorite_landings.csv")
+meteorite_landings <- read_csv("../data/raw_data/meteorite_landings.csv")
 meteorite_landings
-```
-```{r}
-library(janitor)
 ```
 
 
@@ -37,25 +34,21 @@ clean_meteorite_landings
 #3. Split in column `GeoLocation` into latitude and longitude, the new latitude and longitude columns should be numeric.
 ```{r}
 cleaned_meteorite_landings <-clean_meteorite_landings %>% 
-  separate(geo_location, c("latitude", "longitude"), 
+    separate(geo_location, c("latitude", "longitude"), 
            sep = ",",convert = TRUE) %>% 
-  separate(latitude, c("remove", "latitude"), sep = "\\(")  %>% 
-  separate(longitude, c("longitude", "remove_2"), sep = "\\)") %>% 
+    separate(latitude, c("remove", "latitude"), sep = "\\(")  %>% 
+    separate(longitude, c("longitude", "remove_2"), sep = "\\)") %>% 
  
-   mutate(latitude, latitude = as.numeric(latitude)) %>% 
-  mutate(longitude, longitude = as.numeric(longitude)) %>% 
+    mutate(latitude, latitude = as.numeric(latitude)) %>% 
+    mutate(longitude, longitude = as.numeric(longitude)) %>% 
    
-     select(-"remove", -"remove_2") 
+    select(-"remove", -"remove_2") 
+
 cleaned_meteorite_landings
 
   
 ```
 
- 
-
-```{r}
-
-```
 
 4. Replace any missing values in latitude and longitude with zeros.
 5. Remove meteorites less than 1000g in weight from the data.
@@ -101,44 +94,13 @@ longitude_latitude_filter <- filter(latitude_filter,
 longitude_latitude_filter
          
 ```
+
 ```{r}
 write_csv(longitude_latitude_filter, "tidy_meteorite_landings.csv")
 ```
 
 ```{r}
-tidy_meteorite_landings <- read_csv("tidy_meteorite_landings.csv")
+tidy_meteorite_landings <- read_csv("../data/clean_data/tidy_meteorite_landings.csv")
 tidy_meteorite_landings
 ```
 
-
-#2. Find the names and years found for the 10 largest meteorites in the data.
-
-```{r}
-top_ten_by_mass <- tidy_meteorite_landings %>% 
-  arrange(desc(mass_g)) %>% 
-  head(n=10)
-top_ten_by_mass
-```
-
-#3. Find the average mass of meteorites that were recorded falling, vs. those which were just found.
-#filter falling versus found
-then find mean of each
-
-```{r}
-
-              
-```
-
-mean(mass)
-#4. Find the number of meteorites in each year, for every year since 2000.
-group number of meteorites per year since 2000 and summarise
-
-## The project structure
-
-1. Make sure your use an RStudio Project.
-2. Make a repo on GitHub and commit your code to this repo regularly.
-3. It is up to you how to store your code and data. Make sure it is clear for others using the project.
-
-## The README.md file
-
-Make a plain text file called `README.md`. In this file we just want you to describe the structure of your project, and explain what each piece of code you have written does.
