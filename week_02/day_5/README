@@ -1,0 +1,3 @@
+The code `2_meteorite_cleaning_script.r` takes the data from inside `data/raw_data` and creates the file inside `data/clean_data`.
+
+The code `meteorite_analysis.rmd` does a short piece of analysis on this cleaned data set.
