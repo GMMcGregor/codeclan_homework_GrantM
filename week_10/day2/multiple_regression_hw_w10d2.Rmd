@@ -8,6 +8,7 @@ library(tidyverse)
 ```
 
 # MVP
+data is heavily right skewed so might be better to do a log(price). can stablilise variants. can counter fanning out of data from ne (heteroschodasticity)
 
 1. Load the `diamonds.csv` data set and undertake an initial exploration of the data. You will find a description of the meanings of the variables on the relevant [Kaggle page](https://www.kaggle.com/shivam2503/diamonds/)
 
@@ -65,6 +66,26 @@ diamonds_clean %>%
 
 ```
   
+  should have done more:
+  
+  ie
+```{r}
+diamonds_tidy %>%
+  ggplot(aes(x = cut, y = price)) +
+  geom_boxplot()
+```
+
+```{r}
+diamonds_tidy %>%
+  ggplot(aes(x = color, y = price)) +
+  geom_boxplot()
+```
+
+```{r}
+diamonds_tidy %>%
+  ggplot(aes(x = clarity, y = price)) +
+  geom_boxplot()
+```
   
 
 5. Shortly we may try a regression fit using one or more of the categorical predictors `cut`, `clarity` and `color`, so let's investigate these predictors: 
@@ -104,7 +125,7 @@ model_1 <- lm(price ~ carat, data = diamonds_clean)
 summary(model_1)
 ```
 
-
+look wonky because disbn is skewed
 ```{r}
 autoplot(model_1)
 ```

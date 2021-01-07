@@ -1,0 +1,195 @@
+---
+title: "Simple linear regression homework - solutions"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    df_print: paged
+    css: ../../../styles.css
+  pdf_document: default
+---
+
+<div class="blame">
+author: "Del Middlemiss"<br>
+date: "4th June 2019 - rev. 24th July 2019"
+</div>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.align = 'center')
+```
+
+<hr>
+
+# MVP
+
+The file `project_management.csv` contains data sampled from the recent work schedule of a small construction company. Column `estimated_length` contains the estimated length of a building job in days, while column `actual_length` contains the actual recorded length of the job in days. 
+
+We are interested in determining the accuracy of the job estimations made by the company using simple linear regression, so we will eventually want to run a **simple linear regression** using `actual_length` as the dependent variable, and `estimated_length` as the independent variable.
+
+<br>
+
+* Load the data into a dataframe `project`
+```{r}
+library(tidyverse)
+project <- read_csv('data/project_management.csv')
+```
+
+<br>
+
+* Plot the data, taking `estimated_length` as the independent variable and `actual_length` as the dependent variable. 
+
+```{r}
+plot <- project %>%
+  ggplot(aes(x = estimated_length, y = actual_length)) +
+  geom_point()
+
+plot
+```
+
+<br>
+
+* Calculate the correlation coefficient of `estimated_length` and `actual_length` and interpret the value you obtain.
+
+```{r}
+project %>%
+  summarise(corr_coeff = cor(estimated_length, actual_length))
+```
+So we find a very strong positive correlation between the two variables.
+
+<br>
+
+* Perform a simple linear regression using `actual_length` as the dependent variable, and `estimated_length` as the independent variable. Save the model object to a variable. 
+
+```{r}
+model <- lm(actual_length ~ estimated_length, data = project)
+```
+
+<br>
+
+* Interpret the regression coefficient of `estimated_length` (i.e. slope, gradient) you obtain from the model. How do you interpret the $r^2$ value reported by the model?
+
+```{r}
+summary(model)
+```
+
+The regression equation is: 
+
+$$\widehat{\textrm{actual_length}} = 1.4164 + 1.2235 \times \textrm{estimated_length}$$
+so a $1$ day increase in `estimated_length` is associated with a $1.2235$ day increase in `actual_length`, i.e. the company is underestimating job lengths. 
+
+The $r^2$ value tells us that approximately $65\%$ of the variation in `actual_length` can be predicted from the variation in `estimated_length`.
+
+<br>
+
+* Is the relationship statistically significant? Remember, to assess this you need to check the $p$-value of the regression coefficient (or slope/gradient). But you should first check the regression diagnostic plots to see if the $p$-value will be reliable (don't worry about any outlier points you see in the diagnostic plots, we'll return to them in the extension).
+
+```{r}
+library(ggfortify)
+autoplot(model)
+```
+Aside from outliers (certainly point $5$, and perhaps point $18$), the diagnostic plots looks reasonable. The 'Residuals vs Fitted' plot reveals independent residuals, the 'Normal Q-Q' plot looks fine, and there is no systematic upward or downward trend in the the 'Scale-Location' plot.
+
+The relationship is statistically significant, as the $p$-value of the slope is much less than a typical $\alpha$ of $0.05$. 
+
+<hr>
+
+# Extension - Residuals vs Leverage
+
+* Read [this material](https://boostedml.com/2019/03/linear-regression-plots-residuals-vs-leverage.html) on the **leverage** of points in regression, and how to interpret the `Residuals vs Leverage` diagnostic plot produced by plotting the `lm()` model object. So far we've been using the `autoplot()` function to plot the model objects produced by `lm()`, but you can see the base `R` equivalent by doing something like `plot(model)` where `model` is an `lm()` object.
+
+<br>
+
+* Return to your plot from earlier, and now label the data points with their row number in the data frame using `geom_text()` [**Hint** - you can pass `aes(label = 1:nrow(project))` to this layer to generate row index labels]
+  - Identify by eye any points you think might be outliers and note their labels.
+  - Further split your outliers into those you think are 'influential' or 'non-influential' based on a visual assessment of their leverage.
+
+```{r}
+plot <- plot +
+  geom_text(aes(label = 1:nrow(project)), nudge_x = 0.2, nudge_y = 1)
+plot
+```
+Some of the labels overlap, but that's OK as we're looking for outliers, which are likely to occur in isolation. Points $5$ and $18$ both look like outliers, and we might predict point $5$ to be 'influential' as it has high leverage, and point $18$ to be 'non-influential' given it has low leverage.
+
+<br>
+
+* Use your model object from earlier and confirm your visual assessment of which points are 'influential' or 'non-influential' outliers based on Cook's distance. You can get a useful plot of Cook's distance by passing argument `which = 4` to `autoplot()`. Or try the base `R` `plot()` function for comparison [e.g. `plot(model)`; you can also use `par(mfrow = c(2,2))` just before the `plot()` command to get a nice two-by-two display]!
+
+```{r}
+autoplot(model, which = 4)
+```
+
+```{r}
+par(mfrow = c(2,2))
+plot(model)
+```
+
+The Cook's distance plot confirms that point $5$ is an 'influential' outlier, as it lies above $1$. In fact, this threshold is rather arbitrary, a better method is to look to see if any observation has a Cook's distance **substantially greater** than the others. If so, examine that observation.  So we would definitely want to look again at the data gathered and the estimation process for the job on row 5 to see if any errors were made. 
+
+Point $18$ is an outlier, but is 'non-influential', as it has a Cook's distance similar to the other points.
+
+<br>
+
+* Obtain the intercept and regression coefficient of variable `estimated_length` for a simple linear model fitted to data **omitting one of your non-influential outlier points**. 
+  - How different are the intercept and coefficient from those obtained above by fitting the full data set? Does this support classifying the omitted point as non-influential? 
+  
+```{r}
+omit_18 <- project %>%
+  slice(-18)
+
+omit_18_model <- lm(actual_length ~ estimated_length, data = omit_18)
+omit_18_model
+```
+The intercepts differ by $0.175$ in $1.416$, i.e. by $12\%$. The coefficients differ by only $0.002$ in $1.223$, i.e. by $0.2\%$. These support classifying this point as 'non-influential'. 
+<br>
+
+  - Plot the data points, this regression line and the regression line for the full data set. How different are the lines?
+  
+```{r}
+library(modelr)
+
+project <- project %>%
+  add_predictions(model, var = "full_model_pred") %>%
+  add_predictions(omit_18_model, var = "omit_18_model_pred")
+
+project %>%
+  ggplot(aes(x = estimated_length)) +
+  geom_point(aes(y = actual_length)) +
+  geom_line(aes(y = full_model_pred), col = "red") +
+  geom_line(aes(y = omit_18_model_pred), col = "blue")
+```
+The regression line lacking point $18$ is slightly shifted upward, but it's difficult to distinguish the two lines!
+
+<br>
+
+* Repeat the procedure above, but this time **omitting one of your influential outliers**. 
+
+```{r}
+omit_5 <- project %>%
+  slice(-5)
+
+omit_5_model <- lm(actual_length ~ estimated_length, data = omit_5)
+omit_5_model
+```
+The intercepts differ by $2.965$ in $1.416$, i.e. by $209\%$. The coefficients differ by $0.212$ in $1.223$, i.e. by $17\%$. Omitting this point leads to much larger differences in the regression parameters than the omission of point $18$, and justify labelling point $5$ as an influential outlier.
+
+```{r}
+project <- project %>%
+  add_predictions(omit_5_model, var = "omit_5_model_pred")
+
+project %>%
+  ggplot(aes(x = estimated_length)) +
+  geom_point(aes(y = actual_length)) +
+  geom_line(aes(y = full_model_pred), col = "red") +
+  geom_line(aes(y = omit_5_model_pred), col = "blue")
+```
+The two regression lines differ significantly! It is clear how the presence of point $5$ 'drags' the best fit line upward to steeper gradient.
+
+<hr>
+
+# Additional resources
+
+* There are various techniques to perform what is known as 'robust regression' on a dataset. Robust methods are less affected by the presence of outliers. See the `rlm()` function ('robust linear model') in the `MASS` package and [this](http://www.alastairsanderson.com/R/tutorials/robust-regression-in-R/) blog post.
+
+
+

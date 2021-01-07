@@ -1,0 +1,197 @@
+---
+title: "Homework - features and elements of multiple regression"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    df_print: paged
+    css: ../../../styles.css
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+knitr::opts_chunk$set(echo = TRUE, fig.align = 'center')
+```
+
+<hr>
+
+# MVP
+
+1. Load the `diamonds.csv` data set and undertake an initial exploration of the data. You will find a description of the meanings of the variables on the relevant [Kaggle page](https://www.kaggle.com/shivam2503/diamonds/)
+
+```{r, message = FALSE}
+diamonds <- read_csv("diamonds.csv")
+library(GGally)
+library(tidyverse)
+glimpse(diamonds)
+```
+
+2. We expect the `carat` of the diamonds to be strong correlated with the physical dimensions `x`, `y` and `z`. Use `ggpairs()` to investigate correlations between these four variables.
+
+```{r, message = FALSE}
+ggpairs(diamonds[,c("carat", "x", "y", "z")])
+```
+
+3. So, we do find significant correlations. Let's drop columns `x`, `y` and `z` from the dataset, in preparation to use only `carat` going forward.
+
+```{r}
+diamonds_tidy <- diamonds %>%
+  select(-c("x", "y", "z"))
+
+diamonds_tidy
+```
+
+
+4. We are interested in developing a regression model for the `price` of a diamond in terms of the possible predictor variables in the dataset. 
+
+  i. Use `ggpairs()` to investigate correlations between `price` and the predictors (this may take a while to run, don't worry, make coffee or something).
+
+```{r, message = FALSE}
+ggpairs(diamonds_tidy)
+```
+
+`carat` is strongly correlated with `price`. Boxplots of `price` split by `cut`, `color` and particularly `clarity` also show some variation.
+
+  ii. Perform further `ggplot` visualisations of any significant correlations you find.
+
+```{r}
+diamonds_tidy %>%
+  ggplot(aes(x = carat, y = price)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE)
+```
+```{r}
+diamonds_tidy %>%
+  ggplot(aes(x = cut, y = price)) +
+  geom_boxplot()
+```
+
+```{r}
+diamonds_tidy %>%
+  ggplot(aes(x = color, y = price)) +
+  geom_boxplot()
+```
+
+```{r}
+diamonds_tidy %>%
+  ggplot(aes(x = clarity, y = price)) +
+  geom_boxplot()
+```
+
+
+5. Shortly we may try a regression fit using one or more of the categorical predictors `cut`, `clarity` and `color`, so let's investigate these predictors: 
+
+  i. Investigate the levels of these predictors. How many dummy variables do you expect for each of them?
+    
+```{r}
+unique(diamonds_tidy$cut)
+# expect 4 dummies for cut
+
+unique(diamonds_tidy$color)
+# expect 6 dummies for color
+
+unique(diamonds_tidy$clarity)
+# expect 7 dummies for clarity
+```
+
+  ii. Use the `dummy_cols()` function in the `fastDummies` package to generate dummies for these predictors and check the number of dummies in each case.
+
+```{r}
+library(fastDummies)
+diamonds_dummies <- dummy_cols(diamonds, select_columns = c("cut", "clarity", "color"), remove_first_dummy = TRUE)
+glimpse(diamonds_dummies)
+```
+
+
+6. Going forward we'll let `R` handle dummy variable creation for categorical predictors in regression fitting (remember `lm()` will generate the correct numbers of dummy levels automatically, absorbing one of the levels into the intercept as a reference level)
+
+  i. First, we'll start with simple linear regression. Regress `price` on `carat` and check the regression diagnostics.
+    
+```{r}
+mod1 <- lm(price ~ carat, data = diamonds_tidy)
+par(mfrow = c(2,2))
+plot(mod1)
+# the residuals show systematic variation, significant deviation from normality and heteroscedasticity. Oh dear...
+```
+    
+  ii. Run a regression with one or both of the predictor and response variables `log()` transformed and recheck the diagnostics. Do you see any improvement?
+    
+```{r}
+mod2_logx <- lm(price ~ log(carat), data = diamonds_tidy)
+par(mfrow = c(2,2))
+plot(mod2_logx)
+```
+
+```{r}
+mod2_logy <- lm(log(price) ~ carat, data = diamonds_tidy)
+par(mfrow = c(2,2))
+plot(mod2_logy)
+```
+
+```{r}
+mod2_logxlogy <- lm(log(price) ~ log(carat), data = diamonds_tidy)
+par(mfrow = c(2,2))
+plot(mod2_logxlogy)
+# it looks like log transformation of both variables is required to get close to satisfying the regression assumptions.
+```
+
+  iii. Let's use `log()` transformations of both predictor and response. Next, experiment with adding **a single** categorical predictor into the model. Which categorical predictor is best? [**Hint** - investigate $r^2$ values]
+    
+```{r}
+mod3_cut <- lm(log(price) ~ log(carat) + cut, data = diamonds_tidy)
+summary(mod3_cut)
+
+mod3_color <- lm(log(price) ~ log(carat) + color, data = diamonds_tidy)
+summary(mod3_color)
+
+mod3_clarity <- lm(log(price) ~ log(carat) + clarity, data = diamonds_tidy)
+summary(mod3_clarity)
+
+# clarity leads to a model with highest r^2, all predictors are significant
+```
+
+  iv. [**Try this question if you have looked at the material on transformations**] Interpret the fitted coefficients for the levels of your chosen categorical predictor. Which level is the reference level? Which level shows the greatest difference in price from the reference level? [**Hints** - remember we are regressing the `log(price)` here, and think about what the presence of the `log(carat)` predictor implies. We're not expecting a mathematical explanation]
+    
+```{r}
+# 'I1' is the reference level for clarity. In multiple linear regression, the interpretation of any 
+# coefficient is the change in response due to that predictor with other predictors held constant
+# log(price) makes the relationship geometric. Clarity = 'IF' shows the most difference from the reference level.
+
+# Here's how to interpret the `clarityIF` coefficient in the presence of the `log(price)` response
+
+ratio <- exp(1.114625)
+ratio
+
+# so, on average, the price of an IF diamond will be approx. 3 times higher than that of I1 diamond of same carat.
+```
+
+<hr>
+
+# Extension
+    
+7. Try adding an interaction between `log(carat)` and your chosen categorical predictor. Do you think this interaction term is statistically justified?
+    
+```{r}
+mod4_clarity_inter <- lm(log(price) ~ log(carat) + clarity + log(carat):clarity, data = diamonds_tidy)
+summary(mod4_clarity_inter)
+
+# obtain only a small improvement in r^2 from the interaction. 
+# we'll see shortly that the correct test would be an anova() comparing both models
+anova(mod3_clarity, mod4_clarity_inter)
+# the small p-value suggests interaction is statistically significant, but the effect is small.
+```
+    
+8. Find and plot an appropriate visualisation to show the effect of this interaction
+    
+```{r}
+diamonds_tidy %>%
+  ggplot(aes(x = log(carat), y = log(price), colour = clarity)) +
+  geom_point(alpha = 0.1) +
+  geom_smooth(method = "lm", se = FALSE) +
+  facet_wrap(~ clarity)
+
+# not much evidence that the gradient of the line varies significantly with clarity
+```
+
