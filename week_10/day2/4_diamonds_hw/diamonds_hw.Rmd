@@ -1,0 +1,61 @@
+---
+title: "Homework - features and elements of multiple regression"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    df_print: paged
+    css: ../../../styles.css
+  pdf_document: default
+---
+
+<div class="blame">
+author: "Colin Farquhar & Del Middlemiss"<br>
+date: "6th September 2019"
+</div>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.align = 'center')
+```
+
+<hr>
+
+# MVP
+
+1. Load the `diamonds.csv` data set and undertake an initial exploration of the data. You will find a description of the meanings of the variables on the relevant [Kaggle page](https://www.kaggle.com/shivam2503/diamonds/)
+
+2. We expect the `carat` of the diamonds to be strong correlated with the physical dimensions `x`, `y` and `z`. Use `ggpairs()` to investigate correlations between these four variables.
+
+3. So, we do find significant correlations. Let's drop columns `x`, `y` and `z` from the dataset, in preparation to use only `carat` going forward.
+
+4. We are interested in developing a regression model for the `price` of a diamond in terms of the possible predictor variables in the dataset. 
+
+  i. Use `ggpairs()` to investigate correlations between `price` and the predictors (this may take a while to run, don't worry, make coffee or something).
+
+  ii. Perform further `ggplot` visualisations of any significant correlations you find.
+
+5. Shortly we may try a regression fit using one or more of the categorical predictors `cut`, `clarity` and `color`, so let's investigate these predictors: 
+
+  i. Investigate the factor levels of these predictors. How many dummy variables do you expect for each of them?
+
+  ii. Use the `dummy_cols()` function in the `fastDummies` package to generate dummies for these predictors and check the number of dummies in each case.
+
+6. Going forward we'll let `R` handle dummy variable creation for categorical predictors in regression fitting (remember `lm()` will generate the correct numbers of dummy levels automatically, absorbing one of the levels into the intercept as a reference level)
+
+  i. First, we'll start with simple linear regression. Regress `price` on `carat` and check the regression diagnostics.
+    
+  ii. Run a regression with one or both of the predictor and response variables `log()` transformed and recheck the diagnostics. Do you see any improvement?
+
+  iii. Let's use `log()` transformations of both predictor and response. Next, experiment with adding **a single** categorical predictor into the model. Which categorical predictor is best? [**Hint** - investigate $r^2$ values]
+    
+  iv. [**Try this question if you have looked at the material on transformations**] Interpret the fitted coefficients for the levels of your chosen categorical predictor. Which level is the reference level? Which level shows the greatest difference in price from the reference level? [**Hints** - remember we are regressing the `log(price)` here, and think about what the presence of the `log(carat)` predictor implies. We're not expecting a mathematical explanation]
+    
+<hr>
+
+# Extension
+    
+7. Try adding an interaction between `log(carat)` and your chosen categorical predictor. Do you think this interaction term is statistically justified?
+
+8. Find and plot an appropriate visualisation to show the effect of this interaction
+    

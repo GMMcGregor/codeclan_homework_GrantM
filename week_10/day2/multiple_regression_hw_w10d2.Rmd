@@ -1,0 +1,142 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+```
+
+# MVP
+
+1. Load the `diamonds.csv` data set and undertake an initial exploration of the data. You will find a description of the meanings of the variables on the relevant [Kaggle page](https://www.kaggle.com/shivam2503/diamonds/)
+
+```{r}
+diamonds <- read_csv("4_diamonds_hw/diamonds.csv")
+diamonds
+```
+```{r}
+summary(diamonds)
+```
+
+
+2. We expect the `carat` of the diamonds to be strong correlated with the physical dimensions `x`, `y` and `z`. Use `ggpairs()` to investigate correlations between these four variables.
+```{r}
+library(GGally)
+```
+
+```{r}
+diamonds %>% 
+select(carat, x, y, z) %>% 
+  ggpairs()
+```
+
+
+3. So, we do find significant correlations. Let's drop columns `x`, `y` and `z` from the dataset, in preparation to use only `carat` going forward.
+
+```{r}
+diamonds_clean <- diamonds %>% 
+  select(-c(x, y, z))
+
+diamonds_clean
+```
+
+
+4. We are interested in developing a regression model for the `price` of a diamond in terms of the possible predictor variables in the dataset. 
+
+  i. Use `ggpairs()` to investigate correlations between `price` and the predictors (this may take a while to run, don't worry, make coffee or something).
+  
+  #We examine these plots to look for predictors that appear significantly associated with our response variable (price in this case). We should also take a keen interest in how the predictors correlate with each other.
+  
+```{r}
+diamonds_clean %>% 
+  ggpairs()
+```
+
+
+  ii. Perform further `ggplot` visualisations of any significant correlations you find.
+  #Price and carat seem to be the only significant correlation:
+  
+```{r}
+diamonds_clean %>% 
+  ggplot(aes(x = carat, y = price)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE)
+
+```
+  
+  
+
+5. Shortly we may try a regression fit using one or more of the categorical predictors `cut`, `clarity` and `color`, so let's investigate these predictors: 
+
+  i. Investigate the factor levels of these predictors. How many dummy variables do you expect for each of them?
+  #1 for each of the chr factors in each column
+  
+```{r}
+model <- lm(price ~ carat, data = diamonds_clean)
+autoplot(model)
+```
+  
+
+  ii. Use the `dummy_cols()` function in the `fastDummies` package to generate dummies for these predictors and check the number of dummies in each case.
+```{r}
+library(fastDummies)
+```
+cut:5, color: 7, clarity: 8
+```{r}
+diamonds_clean %>% 
+  dummy_cols()
+```
+  
+
+6. Going forward we'll let `R` handle dummy variable creation for categorical predictors in regression fitting (remember `lm()` will generate the correct numbers of dummy levels automatically, absorbing one of the levels into the intercept as a reference level)
+
+  i. First, we'll start with simple linear regression. Regress `price` on `carat` and check the regression diagnostics.
+```{r}
+library(ggfortify)
+```
+  
+```{r}
+model_1 <- lm(price ~ carat, data = diamonds_clean)
+```
+
+```{r}
+summary(model_1)
+```
+
+
+```{r}
+autoplot(model_1)
+```
+  
+  
+    
+  ii. Run a regression with one or both of the predictor and response variables `log()` transformed and recheck the diagnostics. Do you see any improvement?
+  Yes, better fitting around in Rv fitted and normal QQ
+  
+```{r}
+model_1_log <- lm(log(price) ~ log(carat), data = diamonds_clean)
+```
+
+```{r}
+autoplot(model_1_log)
+```
+
+
+  iii. Let's use `log()` transformations of both predictor and response. Next, experiment with adding **a single** categorical predictor into the model. Which categorical predictor is best? [**Hint** - investigate $r^2$ values]
+  
+```{r}
+model_1_log_cat <- lm(log(price) ~ log(carat) + , data = diamonds_clean)
+```
+  
+    
+  iv. [**Try this question if you have looked at the material on transformations**] Interpret the fitted coefficients for the levels of your chosen categorical predictor. Which level is the reference level? Which level shows the greatest difference in price from the reference level? [**Hints** - remember we are regressing the `log(price)` here, and think about what the presence of the `log(carat)` predictor implies. We're not expecting a mathematical explanation]
+    
+<hr>
+
+# Extension
+    
+7. Try adding an interaction between `log(carat)` and your chosen categorical predictor. Do you think this interaction term is statistically justified?
+
+8. Find and plot an appropriate visualisation to show the effect of this interaction
+    
