@@ -99,6 +99,10 @@ summary(houses_tidy)
 * Check for aliased variables using the `alias()` function (this takes in a formula object and a data set). [**Hint** - formula `price ~ .` says 'price varying with all predictors', this is a suitable input to `alias()`]. Remove variables that lead to an alias. Check the 'Elements of multiple regression' lesson for a dropdown containing further information on finding aliased variables in a dataset.
 
 ```{r}
+
+alias(price ~ ., data = houses_tidy)
+
+
 houses_tidy %>% 
 alias(price ~ .)
 ```
