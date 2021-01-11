@@ -1,0 +1,105 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+```{r}
+library(tidyverse)
+library(janitor)
+library(GGally)
+library(modelr)
+```
+
+```{r}
+avocado_data <- read_csv("data/avocado.csv")
+avocado_data
+```
+```{r}
+summary(avocado_data)
+```
+
+```{r}
+glimpse(avocado_data)
+```
+
+#looks like total volume includes PLU other than hass classification therefore deselect hass and focus on total volume sold as looking at average_price
+```{r}
+avocado_data <- avocado_data %>% 
+  clean_names() 
+  
+avocado_data
+```
+```{r}
+glimpse(avocado_data)
+```
+
+
+```{r}
+tidy_avocado_data <- avocado_data %>% 
+  #maybe extract month from date before deselection to identify seasonal rates of production? 
+    select(-c("region", contains("bags"), year, date)) %>% 
+      mutate(type = as.factor(type)) %>% 
+        rename( total_number_sold = total_volume,
+            average_price = average_price,
+              small_hass = x4046,
+              medium_hass = x4225,
+              large_hass = x4770) 
+             # select(-c(contains("hass")))
+tidy_avocado_data
+```
+
+#build model systematically
+```{r}
+ggpairs(tidy_avocado_data)
+```
+#average price has some correlation with small hass, total number and type
+```{r}
+tidy_avocado_data %>%
+  ggplot(aes(x = type, y = average_price, group = 1)) +
+  geom_boxplot()
+```
+
+```{r}
+tidy_avocado_data %>%
+  ggplot(aes(x = small_hass, y = average_price, group = 1)) +
+  geom_boxplot()
+```
+
+```{r}
+tidy_avocado_data %>%
+  ggplot(aes(x = total_number_sold, y = average_price, group = 1)) +
+  geom_boxplot()
+```
+
+
+
+```{r}
+mod1a <- lm(average_price ~ type, data = tidy_avocado_data)
+summary(mod1a)
+
+mod1b <- lm(average_price ~ small_hass, data = tidy_avocado_data)
+summary(mod1b)
+
+mod1c <- lm(average_price ~ total_number_sold, data = tidy_avocado_data)
+summary(mod1c)
+```
+
+#r^2  is lowish (0.38) can explain 38% of the variance in average_price based on type. 
+
+```{r}
+
+par(mfrow = c(2, 2)) 
+plot(mod1a)
+
+par(mfrow = c(2, 2)) 
+plot(mod1b)
+
+par(mfrow = c(2, 2)) 
+plot(mod1c)
+```
+
+now plot diagnostics
+
+#spent too long on working through weeks notes and didn't leave enough time to work through hw. again!
+

@@ -91,9 +91,14 @@ glimpse(houses_tidy)
 # Alias is useful to check if we have aliased variables, i.e. one or more
 # variables that can be computed from other variables
 alias(price ~ ., data = houses_tidy)
+```
+
+
+```{r}
 # seems that sqft_basement can be computed from sqft_living - sqft_above.
 # let's drop sqft_living leaving just the two contributions sqft_basement and 
 # sqft_above
+
 houses_tidy <- houses_tidy %>%
   select(-"sqft_living")
 
