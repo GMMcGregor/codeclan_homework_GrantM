@@ -1,0 +1,116 @@
+---
+title: "Homework Quiz - with solutions"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    df_print: paged
+    css: ../../../../styles.css
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+1. I want to predict how well 6 year-olds are going to do in their final school exams. Using the following variables am I likely under-fitting, fitting well or over-fitting? Postcode, gender, reading level, score in maths test, date of birth, family income.
+<details>
+<summary> **Answer** </summary>
+Over-fitting. Remember that most people are uniquely identifiable by their postcode, gender and date of birth. If we include all these variable in our model, or model will not be finding patterns, but identifying individuals.
+</details>
+
+2. If I have two models, one with an AIC score of 34,902 and the other with an AIC score of 33,559 which model should I use?
+<details>
+<summary> **Answer** </summary>
+The second one - lower AIC scores are better. 
+Answer
+</details>
+
+3. I have two models, the first with: r-squared: 0.44, adjusted r-squared: 0.43. The second with: r-squared: 0.47, adjusted r-squared: 0.41. Which one should I use?
+<details>
+<summary> **Answer** </summary>
+The first. Adjusted r-squared is a better measure, and this has a higher adjusted r-squared value.
+</details>
+
+4. I have a model with the following errors: RMSE error on test set: 10.3, RMSE error on training data: 10.4. Do you think this model is over-fitting?
+<details>
+<summary> **Answer** </summary>
+No, since the error is similar on the test and on the train, the model is unlikely to be over-fitting. 
+</details>
+
+5. How does k-fold validation work?
+<details>
+<summary> **Solution** </summary>
+You split your data in k "folds". For each fold, you fit on all the other data and test on that fold. Finally you measure average performance across all the folds.
+</details>
+
+6. What is a validation set? When do you need one?
+<details>
+<summary> **Solution** </summary>
+A set that is used neither to test or train your models. Used as a final measure of accuracy. They are particularly useful when you are tuning hyper-parameters.
+</details>
+
+
+7. Describe how backwards selection works.
+<details>
+<summary> **Answer** </summary>
+You start with a model that contains all the variables, then you remove variables one by one until you maximise some penalised measure of model fit.
+</details>
+
+
+8. Describe how best subset selection works.
+<details>
+<summary> **Answer** </summary>
+You find every possible subset of variables in your model. You pick the model which scores best on some penalised measure of model fit.
+</details>
+
+9. It is estimated on 5% of model projects end up being deployed. What actions can you take to maximise the likelihood of your model being deployed?
+<details>
+<summary> **Answer** </summary>
+Document from the outset, including rationale and approach, ensure the model validates on a recent data sample, check to ensure it does not contain illegal variables or proxies for these and ensure it can be physically implemented in a production system.
+</details>
+
+10. What metric could you use to confirm that the recent population is similar to the development population?
+<details>
+<summary> **Answer** </summary>
+The Population Stability Index (PSI)
+</details>
+
+11. How is the Population Stability Index defined? What does this mean in words?
+<details>
+<summary> **Answer** </summary>
+$$\textrm{PSI} = \Sigma{((\textrm{Actual %} - \textrm{Expected %}) \times \ln(\frac{\textrm{Actual %}}{\textrm{Expected %}}))}$$
+The PSI is the sum of the difference in the distribution in bands multiplied by weight of evidence of that band
+</details>
+
+12. Above what PSI value might we need to start to consider rebuilding or recalibrating the model
+<details>
+<summary> **Answer** </summary>
+0.1
+</details>
+
+13. What are the common errors that can crop up when implementing a model?
+<details>
+<summary> **Answer** </summary>
+Incorrectly coded in the target system, required variable manipulations not possible in the target system and different interpretations of missing or null values
+</details>
+
+14. After performance monitoring, if we find that the discrimination is still satisfactory but the accuracy has deteriorated, what is the recommended action?
+<details>
+<summary> **Answer** </summary>
+Recalibrate the model
+</details>
+
+15. Why is it important to have a unique model identifier for each model?
+<details>
+<summary> **Answer** </summary>
+So that we have a clear audit trail for all automated decisions.
+</details>
+
+16. Why is it important to document the modelling rationale and approach?
+<details>
+<summary> **Answer** </summary>
+To enable oversight and challenge throughout the model development process 
+</details>
+

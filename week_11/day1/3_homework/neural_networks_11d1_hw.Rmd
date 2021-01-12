@@ -1,0 +1,18 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+#Neural Networks
+Covers a wide range of concepts and techniques.
+
+Uses a variety of curved and bent lines called activation functions to model complicated functions that cannot easily be described in linear manner. You decide which activation functions you want to use before building the neural network
+At its most basic it comprises nodes (input, output) , connections to and from  1 hidden layer of nodes.
+
+It seems to be able to deal with most data such as testing a drug designed to treat an illness and using that data to be able to predict what future doses will be effective
+
+https://docs.google.com/presentation/d/1jo8CLnFI1P_KBOtBBnN5hF-x6g_KI13tcrDEtQL0YzU/edit?usp=sharing
+
+
+
+

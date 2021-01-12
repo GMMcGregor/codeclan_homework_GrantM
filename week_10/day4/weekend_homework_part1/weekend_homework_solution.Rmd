@@ -1,0 +1,554 @@
+---
+title: "Weekend Homework Solution - Model Building"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    df_print: paged
+    css: ../../../styles.css
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.align = 'center')
+```
+
+# MVP
+
+We've looked at a few different ways in which we can build models this week, including how to prepare them properly. This weekend we'll build a multiple linear regression model on a dataset which will need some preparation. The data can be found in the data folder, along with a data dictionary
+
+We want to investigate the avocado dataset, and, in particular, to model the `AveragePrice` of the avocados. Use the tools we've worked with this week in order to prepare your dataset and find appropriate predictors. Once you've built your model use the validation techniques discussed on Wednesday to evaluate it. Feel free to focus either on building an *explanatory* or a *predictive* model, or both if you are feeling energetic!
+
+As part of the MVP we want you not to just run the code but also have a go at **intepreting the results** and write your thinking in comments in your script.
+
+**Hints and tips**
+
+* `region` may lead to many dummy variables. Think carefully about whether to include this variable or not (there is no one 'right' answer to this!)
+* Think about whether each variable is *categorical* or *numerical*. If categorical, make sure that the variable is represented as a factor.
+* We will not treat this data as a time series, so `Date` will not be needed in your models, but can you extract any useful features out of `Date` before you discard it?
+* If you want to build a predictive model, consider using either `leaps` or `glmulti` to help with this.
+
+
+Load libraries:
+
+```{r}
+library(tidyverse)
+library(GGally)
+library(modelr)
+library(janitor)
+```
+
+Load dataset and examine it:
+
+```{r}
+avocados <- clean_names(read_csv("data/avocado.csv"))
+summary(avocados)
+head(avocados)
+```
+
+```{r}
+avocados %>%
+  distinct(region) %>%
+  summarise(number_of_regions = n())
+```
+
+```{r}
+avocados %>%
+  distinct(date) %>%
+  summarise(
+    number_of_dates = n(),
+    min_date = min(date),
+    max_date = max(date)
+  )
+```
+The `x1` variable is related to the database, so we'll get rid of it.  The `region` variable will lead to many categorical levels, but we can try leaving it in. We should also examine `date` and perhaps pull out from it whatever features we can.
+
+```{r}
+library(lubridate)
+trimmed_avocados <- avocados %>%
+  mutate(
+    quarter = as_factor(quarter(date)),
+    year = as_factor(year),
+    type = as_factor(type)
+  ) %>%
+  select(-c("x1", "date"))
+```
+
+Now let's check for aliased variables (i.e. combinations of variables in which one or more of the variables can be calculated exactly from other variables):
+
+```{r}
+alias(average_price ~ ., data = trimmed_avocados )
+```
+
+Nice, we don't find any aliases.
+
+## First variable
+
+Run `ggpairs()` on the remaining variables (leave out `region`, we'll boxplot `average_price` with `region` next):
+```{r}
+trimmed_avocados %>%
+  select(-region) %>%
+  ggpairs()
+```
+Let's save that plot so we can zoom in on it more easily
+
+```{r}
+ggsave("pairs_plot_choice1.png", width = 10, height = 10, units = "in")
+```
+
+```{r}
+trimmed_avocados %>%
+  ggplot(aes(x = region, y = average_price)) +
+  geom_boxplot() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+```
+Test competing models with `x4046`, `type`, `year`, `quarter` and `region`:
+
+```{r}
+model1a <- lm(average_price ~ x4046, data = trimmed_avocados)
+par(mfrow = c(2, 2))
+plot(model1a)
+summary(model1a)
+```
+
+```{r}
+model1b <- lm(average_price ~ type, data = trimmed_avocados)
+par(mfrow = c(2, 2))
+plot(model1b)
+summary(model1b)
+```
+
+```{r}
+model1c <- lm(average_price ~ year, data = trimmed_avocados)
+par(mfrow = c(2, 2))
+plot(model1c)
+summary(model1c)
+```
+
+```{r}
+model1d <- lm(average_price ~ quarter, data = trimmed_avocados)
+par(mfrow = c(2, 2))
+plot(model1d)
+summary(model1d)
+```
+
+```{r}
+model1e <- lm(average_price ~ region, data = trimmed_avocados)
+par(mfrow = c(2, 2))
+plot(model1e)
+summary(model1e)
+```
+
+`model1b` with `type` is best, so we'll keep that and re-run `ggpairs()` with the residuals (again omitting `region`).
+
+## Second variable
+
+```{r}
+avocados_remaining_resid <- trimmed_avocados %>%
+  add_residuals(model1b) %>%
+  select(-c("average_price", "type", "region"))
+
+ggpairs(avocados_remaining_resid)
+```
+```{r}
+ggsave("pairs_plot_choice2.png", width = 10, height = 10, units = "in")
+```
+
+```{r}
+trimmed_avocados %>%
+  add_residuals(model1b) %>%
+  ggplot(aes(x = region, y = resid)) +
+  geom_boxplot() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+```
+
+Looks like `x4046`, `year`, `quarter` and `region` are our next strong contenders:
+
+```{r}
+model2a <- lm(average_price ~ type + x4046, data = trimmed_avocados)
+par(mfrow = c(2, 2))
+plot(model2a)
+summary(model2a)
+```
+
+```{r}
+model2b <- lm(average_price ~ type + year, data = trimmed_avocados)
+par(mfrow = c(2, 2))
+plot(model2b)
+summary(model2b)
+```
+
+```{r}
+model2c <- lm(average_price ~ type + quarter, data = trimmed_avocados)
+par(mfrow = c(2, 2))
+plot(model2c)
+summary(model2c)
+```
+
+```{r}
+model2d <- lm(average_price ~ type + region, data = trimmed_avocados)
+par(mfrow = c(2, 2))
+plot(model2d)
+summary(model2d)
+```
+
+So `model2d` with `type` and `region` comes out as better here. We have some `region` coefficients that are not significant at $0.05$ level, so let's run an `anova()` to test whether to include `region`
+
+```{r}
+anova(model1b, model2d)
+```
+It seems `region` is significant overall, so we'll keep it in!
+
+## Third variable
+
+```{r}
+avocados_remaining_resid <- trimmed_avocados %>%
+  add_residuals(model2d) %>%
+  select(-c("average_price", "type", "region"))
+
+ggpairs(avocados_remaining_resid)
+```
+
+```{r}
+ggsave("pairs_plot_choice3.png", width = 10, height = 10, units = "in")
+```
+
+The next contender variables look to be `x_large_bags`, `year` and `quarter`. Let's try them out.
+
+```{r}
+model3a <- lm(average_price ~ type + region + x_large_bags, data = trimmed_avocados)
+par(mfrow = c(2, 2))
+plot(model3a)
+summary(model3a)
+```
+
+```{r}
+model3b <- lm(average_price ~ type + region + year, data = trimmed_avocados)
+par(mfrow = c(2, 2))
+plot(model3b)
+summary(model3b)
+```
+
+```{r}
+model3c <- lm(average_price ~ type + region + quarter, data = trimmed_avocados)
+par(mfrow = c(2, 2))
+plot(model3c)
+summary(model3c)
+```
+
+So `model3c` with `type`, `region` and `quarter` wins out here.
+Everything still looks reasonable with the diagnostics, perhaps some mild heteroscedasticity.
+
+## Fourth variable
+
+```{r}
+avocados_remaining_resid <- trimmed_avocados %>%
+  add_residuals(model3c) %>%
+  select(-c("average_price", "type", "region", "quarter"))
+
+ggpairs(avocados_remaining_resid)
+```
+
+```{r}
+ggsave("pairs_plot_choice4.png", width = 10, height = 10, units = "in")
+```
+
+The contender variables here are `x_large_bags` and `year`, so let's try them out.
+
+```{r}
+model4a <- lm(average_price ~ type + region + quarter + x_large_bags, data = trimmed_avocados)
+par(mfrow = c(2, 2))
+plot(model4a)
+summary(model4a)
+```
+
+```{r}
+model4b <- lm(average_price ~ type + region + quarter + year, data = trimmed_avocados)
+par(mfrow = c(2, 2))
+plot(model4b)
+summary(model4b)
+```
+
+Hmm, `model4b` with `type`, `region`, `quarter` and `year` wins here
+
+## Fifth variable
+
+We are likely now pursuing variables with rather limited explanatory power, but let's check for one more main effect.
+
+```{r}
+avocados_remaining_resid <- trimmed_avocados %>%
+  add_residuals(model4b) %>%
+  select(-c("average_price", "type", "region", "quarter", "year"))
+
+ggpairs(avocados_remaining_resid)
+```
+
+```{r}
+ggsave("pairs_plot_choice5.png", width = 10, height = 10, units = "in")
+```
+
+It looks like `x_large_bags` is the remaining contender, let's check it out!
+
+```{r}
+model5 <- lm(average_price ~ type + region + quarter + year + x_large_bags, data = trimmed_avocados)
+par(mfrow = c(2, 2))
+plot(model5)
+summary(model5)
+```
+
+It is a significant explanatory variable, so let's keep it. Overall, we still have some heterscedasticity and deviations from normality in the residuals.
+
+## Pair interaction
+
+Let's now think about possible pair interactions: for five main effect variables we have ten possible pair interactions. Let's test them out.
+
+```{r}
+model5pa <- lm(average_price ~ type + region + quarter + year + x_large_bags + type:region, data = trimmed_avocados)
+par(mfrow = c(2, 2))
+plot(model5pa)
+summary(model5pa)
+```
+```{r}
+model5pb <- lm(average_price ~ type + region + quarter + year + x_large_bags + type:quarter, data = trimmed_avocados)
+par(mfrow = c(2, 2))
+plot(model5pb)
+summary(model5pb)
+```
+
+```{r}
+model5pc <- lm(average_price ~ type + region + quarter + year + x_large_bags + type:year, data = trimmed_avocados)
+par(mfrow = c(2, 2))
+plot(model5pc)
+summary(model5pc)
+```
+
+```{r}
+model5pd <- lm(average_price ~ type + region + quarter + year + x_large_bags + type:x_large_bags, data = trimmed_avocados)
+par(mfrow = c(2, 2))
+plot(model5pd)
+summary(model5pd)
+```
+
+```{r}
+model5pe <- lm(average_price ~ type + region + quarter + year + x_large_bags + region:quarter, data = trimmed_avocados)
+par(mfrow = c(2, 2))
+plot(model5pe)
+summary(model5pe)
+```
+
+```{r}
+model5pf <- lm(average_price ~ type + region + quarter + year + x_large_bags + region:year, data = trimmed_avocados)
+par(mfrow = c(2, 2))
+plot(model5pf)
+summary(model5pf)
+```
+
+```{r}
+model5pg <- lm(average_price ~ type + region + quarter + year + x_large_bags + region:x_large_bags, data = trimmed_avocados)
+par(mfrow = c(2, 2))
+plot(model5pg)
+summary(model5pg)
+```
+
+```{r}
+model5ph <- lm(average_price ~ type + region + quarter + year + x_large_bags + quarter:year, data = trimmed_avocados)
+par(mfrow = c(2, 2))
+plot(model5ph)
+summary(model5ph)
+```
+
+```{r}
+model5pi <- lm(average_price ~ type + region + quarter + year + x_large_bags + quarter:x_large_bags, data = trimmed_avocados)
+par(mfrow = c(2, 2))
+plot(model5pi)
+summary(model5pi)
+```
+
+```{r}
+model5pj <- lm(average_price ~ type + region + quarter + year + x_large_bags + year:x_large_bags, data = trimmed_avocados)
+par(mfrow = c(2, 2))
+plot(model5pj)
+summary(model5pj)
+```
+
+So it looks like `model5pa` with the `type`, `region`, `quarter`, `year`, `x_large_bags` and `type:region` is the best, with a moderate gain in multiple-$r^2$ due to the interaction. However, we need to test for the significance of the interaction given the various $p$-values of the associated coefficients
+
+```{r}
+anova(model5, model5pa)
+```
+Neat, it looks like including the interaction is statistically justified.
+
+## Automated approach
+
+Let's try to fit a *predictive* model using `glmulti()`
+
+```{r}
+library(glmulti)
+```
+
+### Train-test split:
+
+This data is pretty big for `glmulti` on a single CPU core, so we'll likely not be able to do a search simultaneously for both main effects and pairwise interactions. Let's look first for the best main effects model using BIC as our metric:
+
+```{r}
+# we're putting set.seed() in here for reproducibility, but you shouldn't include
+# this in production code
+set.seed(42)
+n_data <- nrow(trimmed_avocados)
+test_index <- sample(1:n_data, size = n_data * 0.2)
+
+test  <- slice(trimmed_avocados, test_index)
+train <- slice(trimmed_avocados, -test_index)
+
+# sanity check
+nrow(test) + nrow(train) == n_data
+nrow(test)
+nrow(train)
+```
+
+```{r}
+glmulti_fit <- glmulti(
+  average_price ~ ., 
+  data = train,
+  level = 1, # 2 = include pairwise interactions, 1 = main effects only (main effect = no pairwise interactions)
+  minsize = 1, # no min size of model
+  maxsize = -1, # -1 = no max size of model
+  marginality = TRUE, # marginality here means the same as 'strongly hierarchical' interactions, i.e. include pairwise interactions only if both predictors present in the model as main effects.
+  method = "h", # try exhaustive search, or could use "g" for genetic algorithm instead
+  crit = bic, # criteria for model selection is BIC value (lower is better)
+  plotty = FALSE, # don't plot models as function runs
+  report = TRUE, # do produce reports as function runs
+  confsetsize = 10, # return best 10 solutions
+  fitfunction = lm # fit using the `lm` function
+)
+```
+
+```{r}
+summary(glmulti_fit)
+```
+
+So the lowest BIC model with main effects is `average_price ~ type + year + quarter + total_volume + x_large_bags + region`. Let's have a look at possible extensions to this. We're going to deliberately try to go to the point where models start to overfit (as tested by the RMSE on the test set), so we've seen what this looks like.
+
+```{r}
+results <- tibble(
+  name = c(), bic = c(), rmse_train = c(), rmse_test = c()
+)
+```
+
+
+```{r}
+# lowest BIC model with main effects
+lowest_bic_model <- lm(average_price ~ type + year + quarter + total_volume + x_large_bags + region, data = train)
+results <- results %>%
+  add_row(
+    tibble_row(
+      name = "lowest bic", 
+      bic = bic(lowest_bic_model),
+      rmse_train = rmse(lowest_bic_model, train),
+      rmse_test = rmse(lowest_bic_model, test)
+    )
+  )
+
+# try adding in all possible pairs with these main effects
+lowest_bic_model_all_pairs <- lm(average_price ~ (type + year + quarter + total_volume + x_large_bags + region)^2, data = train)
+results <- results %>%
+  add_row(
+    tibble_row(
+      name = "lowest bic all pairs", 
+      bic = bic(lowest_bic_model_all_pairs),
+      rmse_train = rmse(lowest_bic_model_all_pairs, train),
+      rmse_test = rmse(lowest_bic_model_all_pairs, test)
+    )
+  )
+
+# try a model with all main effects
+model_all_mains <- lm(average_price ~ ., data = train)
+results <- results %>%
+  add_row(
+    tibble_row(
+      name = "all mains", 
+      bic = bic(model_all_mains),
+      rmse_train = rmse(model_all_mains, train),
+      rmse_test = rmse(model_all_mains, test)
+    )
+  )
+
+# try a model with all main effects and all pairs
+model_all_pairs <- lm(average_price ~ .^2, data = train)
+results <- results %>%
+  add_row(
+    tibble_row(
+      name = "all pairs", 
+      bic = bic(model_all_pairs),
+      rmse_train = rmse(model_all_pairs, train),
+      rmse_test = rmse(model_all_pairs, test)
+    )
+  )
+
+# try a model with all main effects, all pairs and one triple (this is getting silly)
+model_all_pairs_one_triple <- lm(average_price ~ .^2 + region:type:year, data = train)
+results <- results %>%
+  add_row(
+    tibble_row(
+      name = "all pairs one triple",
+      bic = bic(model_all_pairs_one_triple),
+      rmse_train = rmse(model_all_pairs_one_triple, train),
+      rmse_test = rmse(model_all_pairs_one_triple, test)
+    )
+  )
+
+# try a model with all main effects, all pairs and multiple triples (more silly)
+model_all_pairs_multi_triples <- lm(average_price ~ .^2 + region:type:year + region:type:quarter + region:year:quarter, data = train)
+results <- results %>%
+  add_row(
+    tibble_row(
+      name = "all pairs multi triples",
+      bic = bic(model_all_pairs_multi_triples),
+      rmse_train = rmse(model_all_pairs_multi_triples, train),
+      rmse_test = rmse(model_all_pairs_multi_triples, test)
+    )
+  )
+```
+
+```{r}
+results <- results %>%
+  pivot_longer(cols = bic:rmse_test, names_to = "measure", values_to = "value") %>%
+  mutate(
+    name = fct_relevel(
+      as_factor(name),
+      "lowest bic", "all mains", "lowest bic all pairs", "all pairs", "all pairs one triple", "all pairs multi triples"
+    )
+  )
+```
+
+```{r}
+results %>%
+  filter(measure == "bic") %>%
+  ggplot(aes(x = name, y = value)) +
+  geom_col(fill = "steelblue", alpha = 0.7) +
+  labs(
+    x = "model",
+    y = "bic"
+  ) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  geom_hline(aes(yintercept = 0))
+```
+BIC is telling us here that if we took our main effects model with lowest BIC, and added in all possible pairs, this would likely still improve the model for predictive purposes. BIC suggests that this 'lowest BIC all pairs' model will offer best predictive performance without overfitting, with all other models being significantly poorer.
+
+Let's compare the RMSE values of the various models for train and test sets. We expect train RMSE always to go down as model complexity increases, but what happens to the test RMSE as models get more complex?
+
+```{r}
+results %>%
+  filter(measure != "bic") %>%
+  ggplot(aes(x = name, y = value, fill = measure)) +
+  geom_col(position = "dodge", alpha = 0.7) +
+  labs(
+    x = "model",
+    y = "rmse"
+  ) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+Lowest RMSE in test is obtained for the 'lowest bic all pairs' model, and it increases thereafter for the more complex models, which suggests that these models are overfitting the training data.
+
+

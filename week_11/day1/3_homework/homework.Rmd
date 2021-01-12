@@ -1,0 +1,48 @@
+---
+title: "Classification & clustering methods homework"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    df_print: paged
+    css: ../../../styles.css
+  pdf_document: default
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.align = "center")
+```
+
+# MVP
+
+Classification and clustering are two fields of machine learning in which there are a particularly large number of methods and algorithms. This can be confusing for people just starting out in the field (and indeed for seasoned hands!). 
+
+We would like you to first investigate the difference between classification and clustering using the resources you find online, and then choose **one** of the machine learning methods listed below and write a paragraph or two on how it works, its strengths and weaknesses, and suitable areas of application. It would be good to find an example use case of your chosen method for a particular problem. Do include a single figure if appropriate (feel free to screenshot this, but cite your source). 
+
+We will make your write-ups available to the rest of the class, and ask you to give a two-minute lightning presentation on your chosen method tomorrow morning!
+
+* k-means clustering
+* logistic regression (dig a little deeper on this one, given we studied it today)
+* linear discriminant analysis (LDA)
+* decision trees and random forests
+* neural networks
+* support vector machines
+* hierarchical clustering
+* naive Bayes classifiers
+
+## Suggested Resources
+
+Try searching to find resources that work for you, but here are some good starting suggestions
+
+* [StatQuest](https://www.youtube.com/user/joshstarmer) is an excellent resource, you'll find lots of short informative videos there on machine learning
+* [Analytics Vidyha](https://www.analyticsvidhya.com/blog/) is also great, it offers numerous blog posts relating to machine learning
+* [This blog](https://machinelearningmastery.com/types-of-classification-in-machine-learning/) by Jason Brownless on types of classification problems is quite good
+* [This blog](https://www.analyticsvidhya.com/blog/2016/11/an-introduction-to-clustering-and-different-methods-of-clustering/) on Analytics Vidhya gives a good first overview of clustering
+
+## Time Limit
+
+Don't go overboard on this: set an absolute maximum of **2 hours work** to research and then write your short description! 
+
+
