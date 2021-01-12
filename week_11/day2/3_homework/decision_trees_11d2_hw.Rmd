@@ -1,0 +1,207 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+In this homework we will create a decision tree to see which factors are useful in predicting whether or not a passenger on the titanic will survive.  
+
+
+Run the code below before you begin: 
+
+
+```{r, warning = FALSE, message = FALSE}
+library(rpart)
+library(rpart.plot)
+library(tidyverse)
+
+library(tidyverse)
+titanic_set <- read_csv('data/titanic_decision_tree_data.csv')
+titanic_set
+```
+
+
+```{r, warning = FALSE, message = FALSE}
+glimpse(titanic_set)
+```
+
+```{r}
+summary(titanic_set)
+```
+```{r}
+
+```
+
+
+```{r, warning = FALSE, message = FALSE}
+shuffle_index <- sample(1:nrow(titanic_set))
+
+# shuffle the data so class order isn't in order - need this for training/testing split later on 
+titanic_set <- titanic_set[shuffle_index, ]
+```
+
+<br>
+
+**Data Dictionary**
+
+  * **sex**: Biological Sex, male or female  
+  * **age_status**: adult or child (child defined as under 16)  
+  * **class** : Ticket class, 1 = 1st (Upper class), 2 = 2nd (Middle Class), 3 = 3rd (Lower Class)    
+  * **port_embarkation**: C = Cherbourg, Q = Queenstown, S = Southampton  
+  * **sibsp** : number of siblings / spouses aboard the Titanic   
+  * **parch**: number of parents / children aboard the Titanic. Some children travelled only with a nanny, therefore parch=0 for them. 
+  * **survived_flag** : did they survive, 0 = No, 1 = Yes  
+
+
+
+# MVP 
+
+
+## Question 1  
+
+Cleaning up the data is always the first step. Do the following: 
+
+  * Take only observations which have a `survived` flag (i.e. that aren't missing)  
+  * Turn your important variables into factors (sex, survived, pclass, embarkation)  
+  * Create an `age_status` variable which groups individuals under (and including) 16 years of age into a category called "child" category and those over 16 into a category called "adult".  
+  * Drop the NA  
+  * Drop any variables you don't need (`X1`, `passenger_id`, `name`, `ticket`, `far`, `cabin`)  
+  
+```{r}
+titanic_clean <- titanic_set %>% 
+  filter(survived == 0 | 1) %>% 
+    mutate(sex = as.factor(sex),
+          survived_flag = factor(survived, levels = c(0,1), labels = c("No", "Yes")),
+          class = factor(pclass, levels = c(3,2,1), labels = c("Lower", "Middle", "Upper")),
+          port_embarked = as.factor(embarked),
+          age_status = as.factor(if_else(age <= 16, "child", "adult"))) %>% 
+          select(-c("X1", "passenger_id", "name", "ticket", "fare", "cabin", "pclass", "embarked", "age", "survived")) %>% 
+  na.omit()
+
+
+titanic_clean
+```
+
+
+## Question 2  
+
+Have a look at your data and create some plots to ensure you know what you're working with before you begin. Write a summary of what you have found in your plots. Which variables do you think might be useful to predict whether or not people are going to die? Knowing this before you start is the best way to have a sanity check that your model is doing a good job.  
+
+```{r}
+titanic_clean
+```
+```{r}
+titanic_clean %>% 
+  ggplot(aes(survived_flag, fill = sex))+
+  geom_bar()
+```
+```{r}
+titanic_clean %>% 
+  ggplot(aes(survived_flag, fill = class))+
+  geom_bar()
+```
+
+```{r}
+titanic_clean %>% 
+  ggplot(aes(survived_flag, fill = port_embarked))+
+  geom_bar()
+```
+```{r}
+titanic_clean %>% 
+  ggplot(aes(survived_flag, fill = age_status))+
+  geom_bar()
+```
+
+
+## Question 3  
+
+<br> 
+Now you can start to build your model. Create your testing and training set using an appropriate split. Check you have balanced sets. Write down why you chose the split you did and produce output tables to show whether or not it is balanced. 
+
+
+```{r}
+# get how many rows we have in total to work out the percentage
+n_data <- nrow(titanic_clean)
+test_index <- sample(1:n_data, size = n_data*0.2)
+```
+
+
+```{r}
+titanic_clean_test  <- slice(titanic_clean, test_index)
+titanic_clean_train <- slice(titanic_clean, -test_index)
+```
+
+#testing proportions are evenly split. test-142, train -570
+```{r}
+library(janitor)
+```
+
+```{r}
+titanic_clean_test %>%
+ janitor::tabyl(survived_flag)
+```
+
+```{r}
+titanic_clean_train %>%
+ janitor::tabyl(survived_flag)
+```
+
+
+## Question 4      
+Create your decision tree to try and predict survival probability using an appropriate method, and create a decision tree plot.
+
+```{r}
+titanic_fit <- rpart(
+  formula = survived_flag ~ ., 
+  data = titanic_clean_train, 
+  method = 'class'
+)
+
+
+rpart.plot(titanic_fit, yesno = 2, fallen.leaves = TRUE, faclen = 6, digits = 4)
+```
+
+
+## Question 5    
+Write down what this tells you, in detail. What variables are important? What does each node tell you? Who has the highest chance of surviving? Who has the lowest? Provide as much detail as you can.  
+
+#overall out of all survued and not survived, prediction was died and chance of survival 0.4069
+#Important variables include sex, class and age_status
+#first level tells us that if sex is male , prediction is not surviving and there is a 19.8% chance of survival.
+#further, if class is then lower or middle, preiction is no to survival, with a 14.4% chance of survival.
+#And worse of all, if you were classed as an adult, prediction is no whith a chance of survival at 11%.
+
+worst chance of survival: male, lower/middle class and adult with survival factor of 0.11
+best chance of survival:female and not lower class with survival factor of of 0.96.
+
+## Question 6  
+Test and add your predicitons to your data. Create a confusion matrix. Write down in detial what this tells you for this specific dataset. 
+
+```{r}
+library(modelr)
+```
+
+
+```{r}
+titanic_test_pred <- titanic_clean_test %>%
+  add_predictions(titanic_fit, type = 'class')
+```
+
+
+```{r}
+# look at the variables 
+titanic_test_pred %>%
+  select(sex, class, age_status, survived_flag, pred)
+```
+ 
+```{r}
+library(caret)
+```
+
+Accuracy of predicting whether someone survived on titanic is 0.78 with true negatives 72 versus false negatives of 17 and false positives 15 versus true positves of 38. 
+```{r}
+confusionMatrix(titanic_test_pred$pred, titanic_test_pred$survived_flag) 
+```
+
+ 
+ 
+
