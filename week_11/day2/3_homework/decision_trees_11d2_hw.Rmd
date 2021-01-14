@@ -2,7 +2,12 @@
 title: "R Notebook"
 output: html_notebook
 ---
+#in library(splitstackshape)
 
+
+can stratiffy data 
+stratified(indt = titanic_clean, group = "survived_flag, bothsets + TRUE, size - 0.2
+)
 In this homework we will create a decision tree to see which factors are useful in predicting whether or not a passenger on the titanic will survive.  
 
 
