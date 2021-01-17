@@ -1,0 +1,96 @@
+---
+title: "Logistic regression homework"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    df_print: paged
+    css: ../../../styles.css
+  pdf_document: default
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(fig.align = "center")
+```
+
+# MVP
+
+You have been provided with a set of data on customer purchases of either 'Citrus Hill' (`purchase = 'CH'`) or 'Minute Maid' (`purchase = 'MM'`) orange juice, together with some further attributes of both the customer and the store of purchase. A data dictionary is also provided in the `data` directory.
+
+We would like you to build the best **predictive classifier** you can of whether a customer is likely to buy Citrus Hill or Minute Maid juice. Use **logistic regression** to do this. You should use either train-test splitting or cross-validation to evaluate your classifier. The metric for 'best classifier' will be **highest AUC value** either in the test set (for train-test splitting) or from cross-validation.
+
+**Issues we faced, thoughts we had**
+
+* This is quite a tough, open-ended exercise. We decided early on to use an automated approach to model selection using `glmulti()`, but feel free to use a manual approach if you prefer!
+* The `Purchase` dependent variable will require wrangling to work in logistic regression. We replaced it with a `purchase_mm` logical variable.
+* Wrangle other categorical variables to be factors too.
+* `WeekOfPurchase` is also quite tough to deal with: should it be added as a factor variable (it will lead to many coefficients), left as numeric, or omitted entirely? See if you can come up with a strategy to decide what to do with it.
+* Check for aliased variables and remove any aliases before you set off to find your best models. Remember, you can use something like `alias(purchase_mm ~ ., data = oj)` to do this, the dot `.` here means 'all variables'. Aliased variables will be listed down the left-hand side, and you can subsequently remove them.
+
+**`glmulti()` hints**
+
+If you decide to use `glmulti()` be prepared for your `R` session to hang if you decide to abort a run! The reason for this is that `glmulti()` actually uses a separate Java runtime to do its thing in the background, and unfortunately `R` can't instruct Java to terminate on request. D'oh! Accordingly, make sure you **save any changes** to your work **before** each `glmulti()` run. That way, you can force quit `RStudio` if necessary without losing work. 
+
+Here are some example inputs for using `glmulti()` with logistic regression for a variety of purposes.
+
+* Run an exhaustive search (i.e. all possible models) over all 'main effects only' logistic regression models using BIC as the quality metric
+
+```{r, eval=FALSE}
+glmulti_search_all_mains <- glmulti(
+  purchase_mm ~ ., 
+  data = train,
+  level = 1,               # No interactions considered, main effects only
+  method = "h",            # Exhaustive approach
+  crit = "bic",            # BIC as criteria
+  confsetsize = 10,        # Keep 10 best models
+  plotty = F, 
+  report = T,              # No plots, but provide interim reports
+  fitfunction = "glm",     # glm function
+  family = binomial(link = "logit")) # binomial family for logistic regression
+
+summary(glmulti_search_all_mains)
+```
+
+* Imagine now you've found the main effects model with lowest BIC, and you would like to add on a single pair interaction considering only main effects in the model. Which single pair addition leads to lowest BIC?
+
+```{r, eval=FALSE}
+glmulti_search_previous_mains_one_pair <- glmulti(
+  purchase_mm ~ var_a + var_b + var_c + var_d + var_e, 
+  data = train,
+  level = 2,               # Interactions considered
+  method = "h",            # Exhaustive approach
+  crit = "bic",            # BIC as criteria
+  confsetsize = 10,        # Keep 10 best models
+  marginality = TRUE,      # consider pairs only if both main effects in model
+  minsize = 6,             # minsize, maxsize and marginality here force 
+  maxsize = 6,             # inclusion of a single pair beyond the five main effects
+  plotty = F, 
+  report = T,              # No plots, but provide interim reports
+  fitfunction = "glm",     # glm function
+  family = binomial(link = "logit")) # binomial family for logistic regression
+
+summary(glmulti_search_previous_mains_one_pair)
+```
+
+* In cases where an exhaustive search isn't possible because there are too many possible models to search through, you could try a search using a genetic algorithm. Here, run a genetic algorithm search over all main effects plus pair models, using lowest AIC as the quality criterion
+
+```{r, eval=FALSE}
+glmulti_ga_search_with_pairs_aic <- glmulti(
+  purchase_mm ~ .,
+  data = train,
+  level = 2,               # Interactions considered
+  method = "g",            # Genetic algorithm approach
+  crit = "aic",            # AIC as criteria
+  confsetsize = 10,        # Keep 10 best models
+  marginality = TRUE,      # consider pairs only if both main effects in model
+  plotty = F, 
+  report = T,              # No plots, but provide interim reports
+  fitfunction = "glm",     # glm function
+  family = binomial(link = "logit")) # binomial family for logistic regression
+
+summary(glmulti_ga_search_with_pairs_aic)
+```
+
+

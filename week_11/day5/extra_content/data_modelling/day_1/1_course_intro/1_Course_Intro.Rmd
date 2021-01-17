@@ -1,0 +1,68 @@
+---
+title: "Data Modelling - Module Introduction and Outline"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    df_print: paged
+    css: styles.css
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+<div class="blame">
+author: Julie Williamson<br>
+date: 27 November 2019
+</div>
+
+# Welcome!
+
+Welcome to this module on Data Modelling. The topic of Data Modelling was recognised as an integral part of IT development many years ago.  Getting it on the agenda nowadays is not so easy, mainly due to lack of awareness of where it fits in and its benefits.  That is why we are here, and as a Data Modelling professional it is great to see it on the curriculum and be asked to provide the content.
+
+# A bit about me...
+
+My name is Julie Williamson.  Born in Edinburgh, brought up in Penicuik and apart from a couple of forays south of the border I've pretty much spent my life living either in Penicuik or Edinburgh.  I have a long suffering husband and 2 grown up daughters.
+
+I've been a data modeller for ... 30 years.  Amazingly in that time, I have never called myself, or considered myself to be anything else!
+
+That whole career has its foundations in a 5 week option on a MSc Business Information Technology course at Strathclyde Uni where I was grabbed by the process of dissecting information into its basic component data and giving it a structure and visual representation. 
+
+Prior to my MSc I was a librarian for 3 years after completing a degree in Librarianship at Robert Gordons in Aberdeen. I started that in 1980 at the time when computers were the size of rooms and data processing happened using punched cards, but personal computers were just emerging and Librarianship was starting to see the benefits of computers for managing the catalogues and classifications of library books.  I was hooked not only by a love for books and information, but by the possibilities of computing in the industry.
+
+So moving into an arm of IT 100% concerned with the management of data was a natural progression.  And to be honest I'm still hooked!
+Most of my 30 years has been spent working in Financial Services companies around Edinburgh, I started off in Rolls Royce in Derby so a bit of Engineering company IT there and I had a short stint at the Scottish Government too.  However, once you know what you are doing, the skills and process are transferrable to any industry.  
+
+I really hope I can provide you all with some sense of how engaging data modelling can be ....we shall see, maybe it takes a very odd sort of person..!
+
+# Planned schedule for the 2 days
+
+**Today (Day 1) we'll cover the following:**
+
+* Introduction to Data Models - what is a Data Model, where did they originate and what do they offer the typical organisation today
+
+* Getting started with Data Modelling - models within IT architecture, layers of models and their scopes, standards and tooling
+
+* Logical Data Modelling - working through a case study together outlining all the steps involved
+
+* Lab for the rest of the day - your turn to work on a small case study model yourselves using what you have hopefully learned in class.
+
+
+**Day 2**
+
+* Reviewing the complete LDM
+
+* Physical Data Modelling - we'll touch on this but not in too much detail
+
+* Other types of modelling - we'll cover some other important model types, including Class modelling, and a bit on dimensional modelling
+
+* Finally we'll wrap up with some quick words of wisdom on other things you need to be aware of when modelling.
+
+
+**Homework**
+
+* There will be a small data modelling exercise to carry out over the 2 evenings

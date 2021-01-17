@@ -1,0 +1,110 @@
+---
+title: "Text Mining Homework"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    df_print: paged
+    css: ../../../styles.css
+  pdf_document: default
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, eval = FALSE, fig.align = "center", message = FALSE, warning = FALSE)
+```
+
+# MVP
+
+Using the dataset `austen_books()` from the package `janeaustenr`:
+
+1. Find the most common words in both Pride & Prejudice and Sense & Sensibility.
+2. Find the most common words in both Pride & Prejudice and Sense & Sensibility, not including stop words.
+3. Find the most common sentiment words in both Pride & Prejudice and Sense & Sensibility.
+
+```{r, message = FALSE}
+library(dplyr)
+library(tidytext)
+library(janeaustenr)
+```
+
+```{r}
+# 1 
+austen_words <- 
+austen_books() %>%
+  filter(book == "Pride & Prejudice" | book == "Sense & Sensibility") %>%
+  unnest_tokens(word, text) %>%
+  count(word, book, sort = TRUE)
+```
+```{r}
+austen_words %>%
+  filter(book == "Pride & Prejudice")
+```
+```{r}
+austen_words %>%
+  filter(book == "Sense & Sensibility")
+```
+
+```{r}
+# 2
+austen_words <- 
+austen_words %>%
+  anti_join(stop_words)
+```
+
+```{r}
+austen_words %>%
+  filter(book == "Pride & Prejudice")
+```
+```{r}
+austen_words %>%
+  filter(book == "Sense & Sensibility")
+```
+
+```{r}
+# 3
+austen_sentiment_words <-
+  austen_words %>%
+  inner_join(get_sentiments("bing"))
+```
+
+```{r}
+austen_sentiment_words %>%
+  filter(book == "Pride & Prejudice")
+```
+
+```{r}
+austen_sentiment_words %>%
+  filter(book == "Sense & Sensibility")
+```
+
+# Extension
+
+Taking your results above. Can you create a plot which visualises the differences between the books?  
+
+```{r}
+library(ggplot2)
+
+austen_words <-
+austen_words %>%
+mutate(
+  sentiment = "Neutral"
+)
+  
+plot_df <- 
+rbind(
+  slice(austen_words, 1:10),
+  slice(austen_sentiment_words, 1:10)
+)
+
+ggplot(plot_df) +
+  aes(x = word, y = n, fill = book) +
+  geom_col(position = "dodge") +
+  coord_flip() +
+  facet_wrap(sentiment ~ ., scales = "free")
+```
+
+
+
+

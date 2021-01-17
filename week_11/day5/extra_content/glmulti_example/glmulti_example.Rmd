@@ -1,0 +1,188 @@
+# `glmulti` usage introduction
+
+```{r, message=FALSE}
+library(CodeClanData)
+library(tidyverse)
+```
+
+```{r}
+glimpse(insurance)
+```
+
+Let's use `caret` to perform train-test splitting. The `createDataPartition()` function has the nice feature that it takes in a `y=` argument specifying outcomes, and it will try to ensure similar distributions of those outcomes in train and test sets. 
+
+```{r}
+library(glmulti)
+library(caret)
+
+train_index <- createDataPartition(insurance$charges, p = 0.8, list = FALSE, times = 1)
+
+train <- insurance[train_index, ]
+test <- insurance[-train_index,]
+
+train %>%
+  ggplot(aes(x = charges)) +
+  geom_histogram()
+
+test %>%
+  ggplot(aes(x = charges)) +
+  geom_histogram()
+```
+
+Now we'll use `glmulti()` for predictor selection. First, let's get the size of the full problem
+
+```{r}
+glmulti_fit <- glmulti(
+  charges ~ ., # model to fit, in this case, charges varies with everything
+  level = 2, # level = 2 means try pairwise interactions. level = 1 means main effects only
+  data = train, # data to use for fitting
+  minsize = 0, # min size of model to try, in number of predictors
+  maxsize = -1, # max size to try, set to -1 for unlimited
+  marginality = TRUE, # marginality true means include pairwise interaction only if both main effects present in model.  
+  method = "d", # method "d" means trial run, to get size of problem. Set to "h" for exhaustive search, or "g" for genetic algorithm
+  confsetsize = 1000, # how many models should glmulti() return? Must be less than total size of problem
+  plotty = FALSE, # provide progress plots? Generally annoying.
+  report = TRUE, # provide progress reports? Generally useful.
+  fitfunction = lm, # use lm() as fit function. Can also use glm() for logistic regression.
+  crit = aic # criterion for selecting best models. 
+)
+```
+
+Hmm, 40069 possible models in full search space. The genetic algorithm and exhaustive search would both be able to hand this in around 5 minutes, but let's limit the model space just by way of example.
+
+```{r}
+glmulti_fit <- glmulti(
+  charges ~ ., # model to fit, in this case, charges varies with everything
+  level = 2, # level = 2 means try pairwise interactions. level = 1 means main effects only
+  data = train, # data to use for fitting
+  minsize = 0, # min size of model to try, in number of predictors
+  maxsize = 10, # max size to try, set to -1 for unlimited
+  marginality = TRUE, # marginality true means include pairwise interaction only if both main effects present in model.  
+  method = "d", # method "d" means trial run, to get size of problem. Set to "h" for exhaustive search, or "g" for genetic algorithm
+  confsetsize = 1000, # how many models should glmulti() return? Must be less than total size of problem
+  plotty = FALSE, # provide progress plots? Generally annoying.
+  report = TRUE, # provide progress reports? Generally useful.
+  fitfunction = lm, # use lm() as fit function. Can also use glm() for logistic regression.
+  crit = aic # criterion for selecting best models. 
+)
+```
+
+Now the model space is down to 6926 models. Let's go ahead and use exhaustive search on this, with `aic()` as our criterion function.
+
+```{r}
+glmulti_fit <- glmulti(
+  charges ~ .,
+  level = 2,
+  data = train,
+  minsize = 0,
+  maxsize = 10,
+  marginality = TRUE,
+  method = "h",
+  confsetsize = 1000,
+  plotty = FALSE,
+  report = TRUE,
+  fitfunction = lm,
+  crit = aic
+)
+```
+
+The `glmulti_fit` object we saved above has a bunch of useful stuff stored in slots. In particular, slot `@objects` contains all 1000 models we asked `glmulti()` to keep above (via the `confsetsize` argument). Let's use each of these saved model objects (remember they have been trained on the `train` set) to predict `charges` for the `test` set. We'll then calculate RMSE for each model on the test set
+
+```{r}
+rmse_results <- numeric(1000)
+for (i in 1:1000){
+  this_model <- glmulti_fit@objects[[i]]
+  predictions <- predict(this_model, newdata = test)
+  rmse_results[i] <- sqrt(mean((predictions - test$charges)^2))
+}
+plot(rmse_results)
+```
+
+Lots of reasonably competitve models! The minimum is at
+
+```{r}
+min(rmse_results)
+which(rmse_results == min(rmse_results))
+```
+
+The 1000 models we requested are stored in the `glmulti_fit` in order of the criterion function, lowest first (you can see these values in the `@crits` slot). The corresponding formulae of the models are in the `@formulas` slot.
+
+Let's see what the first and second models look like, with their `aic` values and formulae:
+
+```{r}
+glmulti_fit@objects[[1]]
+glmulti_fit@crits[[1]]
+glmulti_fit@formulas[[1]]
+
+glmulti_fit@objects[[2]]
+glmulti_fit@crits[[2]]
+glmulti_fit@formulas[[2]]
+```
+
+<hr>
+
+# 'Fooling' `glmulti()` into using $r^2$ 
+
+The `glmulti()` function is set up to minimise an information criterion (`aic`, `bic` etc), so what do we do if we want to mimic `leaps` and use $r^2$ to select the best model of a given size? 
+
+We can trick `glmulti()` into doing this by passing the *negative of $r^2$* as a criterion function, like so
+
+```{r}
+neg_r2 <- function(model){
+  sum_model <- summary(model)
+  return( -1 * sum_model$r.squared)
+}
+```
+
+So now finding the model with highest $r^2$ is equivalent to finding the model with lowest $-r^2$!
+
+Let's now get `glmulti()` to search exhaustively for the 'best' model (i.e. highest $r^2$) out to models with 10 predictors:
+
+```{r}
+# save each glmulti_fit object to a list as we go
+best_fits <- list()
+
+# search out to models with 10 predictors
+num_pred_max <- 10
+
+for (num_pred in 1:num_pred_max){
+  # track progress
+  print(paste("num_pred =", num_pred))
+  
+  # run the search for models of num_pred size
+  this_fit <- glmulti(
+    charges ~ .,
+    level = 2,
+    data = train,
+    minsize = num_pred, # only models of num_pred size
+    maxsize = num_pred, # only models of num_pred size
+    marginality = TRUE,
+    method = "h",
+    confsetsize = 1, # save only best model from this search
+    plotty = FALSE,
+    report = FALSE,
+    fitfunction = lm,
+    crit = neg_r2 # our custom crit function
+  )
+  
+  best_fits <- append(best_fits, this_fit)
+}
+```
+
+Now calculate the RMSE for the test set for each of the best models of a given size we found above.
+
+```{r}
+rmse_results <- numeric(num_pred_max)
+for (i in 1:num_pred_max){
+  this_model <- best_fits[[i]]@objects[[1]]
+  predictions <- predict(this_model, newdata = test)
+  rmse_results[i] <- sqrt(mean((predictions - test$charges)^2))
+}
+plot(rmse_results)
+```
+
+```{r}
+min(rmse_results)
+which(rmse_results == min(rmse_results))
+```
+

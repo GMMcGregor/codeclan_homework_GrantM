@@ -1,0 +1,116 @@
+---
+title: "Additional Modelling Considerations"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    df_print: paged
+    css: styles.css
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Learning Objectives
+
+* A quick whizz through some other things to keep in mind in your modelling lifecycle
+* Hints and tips from a seasoned pro!
+
+
+# Reference Data
+
+Remember those bits of the model we termed Reference Entities?
+
+Every data solution is made up of transactional data, and reference data which describes or classifies it.  As we discovered in our modelling exercise, the reference data itself can fall into different categories:
+
+* Classification value sets e.g. Gender, Accommodation Type, Transfer Type etc.  These follow a common format of Classification Value Scheme e.g. Gender, and then the value list inside that scheme e.g. Male, Female, Unspecified etc.  The value may take the form of codes and descriptions e.g. M - Male etc.  This is where we return to the taxonomy idea.  A value set inside a classification scheme is a taxonomy. 
+
+* Other reference data can be full blown data records e.g. Postal Address - a central list of Postal Addresses may be subscribed to externally and then made available to your users to ensure that no badly formed address details are captured in the database.   Or it may just be a list of postcodes, currency codes, country codes etc.  
+
+Reference data and taxonomies are hugely important when it comes to reporting applications, or analysing unstructured data where the data is understood only by a classification applied to text strings.
+
+Regardless of the type of reference data it is imperative that a good process is built around the management of the lists.  Where lists are accessed externally someone needs to own the management of ensuring this is maintained.  And where lists are built and maintained internally they need to be part of a Data Governance process where business owners agree a conformed set of values for the organisation.  This is particularly important when you are in an organisation with multiple systems crossing data boundaries and capturing different value sets for what is semantically the same.
+
+You will have covered this in the Data Governance day but this is a good place for a reminder on how important it is to ensure someone is owning this very important task.  If your organisation is small enough it will be enough to document value sets in your LDM but you may need to consider a separate glossary tool for this.
+
+# Test Data
+
+Test data should be the responsibility of a test team working with the Business SMEs to pull together enough realistic data to work in test scenarios.  However, again, in a small organisation, you may be required to come up with test data.  This needs carefully managed as a separate resource, similar to the Reference data so make sure you have dummy records set up in a spreadsheet or something similar that you can plug into databases and make available to your testers. 
+
+# Glossaries and Data Dictionaries
+
+Everything in your model should have a definition, and ideally you have carried the same definitions through from Conceptual right through to Physical models.  When you extract those definitions into a report, hey presto, you have a glossary or (in the case of a physical model, a data dictionary). You can get different business glossary tools to sit separate from modelling tools but really there is no need for it to be separate. If your modelling tool has decent reporting options and you approach your model the correct way, including defining every reference data type (which makes up your taxonomy of types) then you can get everything you need from the model.  
+
+Often when you get to the PDM definitions fall by the wayside, especially if you have traceability back to the logical level.  However, the benefits of a well documented database can't be underestimated.  Frequently maintenance of the database starts with looking at its table structures - technical developers don't appreciate they might have a lovely logical model sitting above it.  So a data dictionary supporting physical tables is a wonderful thing to have available. Also, as a number of physical solutions may emanate from a single LDM it isn't unusual for the PDM to have more contextualised definitions adding information around what process is maintaining it, business rules as to what scenarios require a mandatory versus optional occurrence of a data item for example. So please do your best to ensure your physical design is well documented!
+
+# Model Management
+
+As has been mentioned many times - your data models should be considered a permanent asset in the organisation, and should have maintenance processes in place to keep them up to date with the data landscape of the organisation.
+
+Model management processes need to be put in place and adhered to.
+
+Many modelling tools can help with this with versioning labels and model merge facilities.  Be aware that for any given scope, whether it be the enterprise, or a project, there should only be one central LDM (and perhaps corresponding CDM). If you have more than 2 or 3 modellers working concurrently you can start having model management headaches.  You need to carefully organise the subject areas the modellers are working in so you can minimise the possibility of conflicts with different modellers attacking the same area in different ways.
+
+Model merging is not an easy task given the complexity of model files so make sure you dedicate enough resource to this if necessary.
+
+
+# Agile versus Waterfall
+
+Modellers don't like Agile but it's the modern way and we need to work with it.
+
+Modelling has traditionally been a waterfall development activity.  Requirements through to design. It can be iterative but the nature of the iterations will be refinement or extensions to what should be a fairly stable model base.  Agile developments lend themselves to front end development sitting above an already defined and stable foundation.  They are also based around User Stories which are process based and will cut across a fairly large scope of data.  If the base model for that user story is not in place it is impossible to be modelling at the same time as development wanting to use that model is happening.
+
+Another trait of Agile is minimal documentation.  Models by their very definition are repositories of documentation. You need time to complete this properly for it to provide maximum benefit not only to today's projects but those of 5 or 10 years down the line.  
+
+And models don't like change.  Because the LDM has the potential to be the basis of lots of physical implementations when you get something wrong the the potential knock on impacts are not nice.  
+
+So the advice is:
+
+1. Try to base Agile developments on an already designed and stable data platform
+2. If the development involves actually building that platform then try and influence the order of the sprints to:
+  + allow a modelling and design sprint at least 3 sprints ahead of the development sprint
+  + have User Stories that focus on a single area of the model and allow completion of that area in one go, e.g. not be hitting Customer modelling in Sprint 3, 7, 10 etc!  If you still have modelling to do in Sprint 10 then you can guarantee that the modelling in Sprint 3 will be wrong!
+3. Be wary of the need for test data in sprint cycles if you are working on one platform - test data for one sprint team might break the development for another test team.
+4. Similarly get your Reference Data sets up and running before an Agile Development.
+
+
+# Using Industry Models
+
+Occasionally you may come across the term "industry models".
+
+These are big modelling frameworks, the biggest covering the Banking and Life Insurance industries and developed by the big boys...IBM and Teradata.
+
+The idea is that they have done all the work to model the industry and all you need to do is spend a whole lot of money to have an "accelerator" to your in-house model development, after all, one bank is the same as any other bank. 
+
+Experience of working with these models is that yes you may have a 90% hit in structures that will satisfy your requirement, but the effort it takes to map your organisation's view of the world into the structures means that it is not the accelerator it purports to be.  Instead of focussing on modelling your business, all the effort shifts to a mapping exercise and making very generic industry (usually American - e.g. Check rather than Cheque) terminology and definitions work for your users.  
+
+So treat with caution.  
+
+Something that is useful to a modeller starting out is a book of model patterns where you will get suggested structures for common data such as Involved Party, or Accounts.  But always try it out yourself first and check these things if you get stuck.  It is good to gain the experience for yourself.
+
+A good series of pattern books is by Len Silverston: The Data Model Resource Book, Volumes 1, 2 and 3
+
+Or another author is Dvid Hay who has various books - plus you can download free one of his pretty old (but still useful and relevant) patterns book here:
+https://epdf.pub/data-model-patterns-conventions-of-thought.html
+<br>
+
+<div class='emphasis'>
+
+**Finally...**
+
+* Gut feel goes a long way in modelling!
+
+* If it doesn't feel right then it probably isn't the right bit of modelling.  Modelling is not an exact science and as you gain experience you'll definitely get the feel for it.  And you will also probably find that the first way you modelled it was right after all.
+
+* Don't over analyse!
+
+**Good luck and Enjoy!**
+
+</div>
+
+
+
+

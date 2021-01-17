@@ -1,0 +1,267 @@
+---
+title: "Other Model Types"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    df_print: paged
+    css: styles.css
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Learning Objectives
+
+* Understand difference between the ER LDM and other Logical model types
+* Overview of Warehouse and Dimensional models
+* Focus on UML Class Models 
+
+### Duration - 60 minutes
+
+# Other Model Types and their Uses
+
+We've spent this module so far focussing on Entity Relationship modelling, in particular the ER LDM.  References to the LDM in the modelling community usually refer to ER modelling so the terms are pretty synonymous.
+
+ER modelling came about in the 1970s alongside the emergence of relational database management systems (RDBMS) courtesy of IBM.  Ultimately it's focus is seen as modelling for business understandibility of what will ultimately become a database design. 
+
+But what if you want to implement data solutions which don't necessarily take the form of a relational database?
+
+<details>
+<summary>**Answer...**</summary>
+
+You build another data model suited to what you need!  
+
+</details>
+
+
+## UML Class Models
+
+Class models are a subset of the model types available within the graphical notation standards known as UML - Unified Modeling Language.
+
+What is UML?
+
+There is a lot of information out there on what UML is and why you should use it.  One of the recommended tools on the list shared with you on Day 1 is Visual Paradigm. 
+
+Their website has a good overview:
+
+https://www.visual-paradigm.com/guide/uml-unified-modeling-language/what-is-uml/
+
+and within that is some guidance on class diagrams:
+
+https://www.visual-paradigm.com/guide/uml-unified-modeling-language/what-is-class-diagram/
+
+UML is a family of graphical notations backed by a single meta-model that help in describing and designing systems.  As we mentioned in our discussions around architecture UML is also a powerful tool for documenting architectures. You can use the UML object types to represent higher level things such as  only system architecture but business architecture.
+
+The meta-model allows the user to manipulate diagram types for their own purposes.
+
+<br>
+<details>
+<summary>**What is a Class Model**</summary>
+
+A class model can be at the conceptual or logical level similar to the CDM and LDM.  In ER modelling we talk about Entities which eventually become tables in implementation.  So we are ultimately modelling collections of data which are stored.  Class models capture definitions of Objects - which do equate to real life Entities - but these objects are participating in systems, rather than being collections of data.  The attributes in the class describe the objects rather than become attributes to be stored with the entity.  
+
+Class models also document behaviours with the use of methods/or operations on the classes.  These describe what the objects can do in the scope of the system (or business if being used at the architecture level).
+
+<div class='emphasis'>
+To get the head round classes and Objects:
+
+The class is the definition of the thing that is an Object.
+
+So the Class is **Individual** and the Object is **Julie Williamson**
+
+Similar to the entity model the class attributes define what Julie Williamson or any other object of class Individual has as attributes e.g. eyeColour.  It will also have operations defining how the objects relate to the system e.g. getCurrentSalary(). 
+
+</div>
+</details>
+
+<br>
+
+Here is an example from the Visual Paradigm Online set of templates:
+
+![](images/Class Diagram - Airline.png)
+
+You can locate this template here:
+
+https://diagrams.visual-paradigm.com/#diagram:proj=0&type=ClassDiagram&gallery=/repository/18e0ccca-88c6-4765-8249-4afd4caef2a2.xml&name=Class%20Diagram%20-%20Class%20in%20a%20Package%20(Airline)
+
+As you can see in the model example there are similar constructs to those we have modelled in our class but the notation looks different.
+
+You can subtype Classes in the same way as Entities.
+
+Because Class models are not aimed at storage and retrieval solutions there is no need to be concerned with keys and joins.  And normalisation rules need not apply - you are allowed attributes with a cardinality of 0..* e.g. middleName - as the implementation would just make that a list element. 
+
+There are more options in relationships as the Class model is describing system behaviour. 
+
+So in many ways, if you are not concerned with database implementation, Class Models are a good option for describing business data.
+
+In your own time work through the summary at https://www.visual-paradigm.com/guide/uml-unified-modeling-language/what-is-class-diagram/ for an excellent overview.
+
+### Tooling
+
+UML tooling is very flexible and there are probably more open source options.  As was mentioned before around tools, many UML tools have a pseudo class diagram option for an ER model. But you'll not find it the other way round.  It is worth considering UML tooling if you are likely to be doing other types of modelling, e.g. process or architecture.
+
+<div class='emphasis'>
+
+Whilst Visual Paradigm information is mentioned here, and the tool offers many of the UML diagram types please be aware that Visual Paradigm is not a full scale modelling tool, it is a diagramming tool with no underlying database of content.
+
+If you want a good cheap option for a very powerful UML toolkit look into Enterprise Architect from the company Sparx Systems. That offers pretty much all you would need to fully model your enterprise (processes, systems, use cases etc, and data as class and object models).  It even manages to use the uml structures to represent ER logical and physical models so is a great all round solution.
+
+</div>
+
+
+### Switching Between Class and ER models
+
+There are occasions when you might have a Class model in your organisation and you want to develop a relational database. 
+
+Or you have an LDM but you want to develop an Object Oriented database, or start constructing XSD data definitions for XML messages.
+
+It is possible to translate ER models into Class Models and vice versa.  There are rules you would follow which we can't go into here but once you understand the rules it is quite an easy task.  Just remember that behaviours don't exist in ER models so if you do convert ER to Class model you may need to add operations if required.  And if converting the other way you would not take across any class operations into the ER model. 
+
+<div class='emphasis'>
+
+For more information on XSD/XML go to the https://www.w3schools.com/ website for a wealth of information
+
+A great book comparing ER modelling techniques and Class modelling techniques is:
+David C. Hay: UML & Data Modeling - a reconciliation
+
+And a great general book on UML is the bible on the standard:
+Martin Fowler: UML Distilled 
+
+</div>
+
+
+
+
+## Warehouse Models
+
+A data warehouse is a relational database with some particular modelling constructs included to facilitate the input of large volumes of data from different sources for the purposes of reporting.
+
+Very simply, Warehouse modelling follows exactly the same process as our standard LDM to PDM modelling and models things relationally. The only difference is that some standard constructs are added to each table:
+
+* History is facilitated through start and end dates
+* Timestamps are a standard 
+* Surrogate key
+* source system id for loaded record
+
+In addition, some parts of the model are genericised to facilitate easy loading of data e.g. metrics into name/value pairs. Some generic constructs might appear in standard PDMs but there will be more in a Warehouse model.
+
+For example you might have an Individual entity in your standard LDM with 3 phone number attributes:
+
+* Home Phone
+* Work Phone
+* Mobile Phone
+
+You might decide to implement that in your database as 3 distinct attributes.
+
+However, the downside of that is that if we end up with a new phone number type of say Skype Phone then you are force to add that as a new attribute and go through the pain of reimplementing the table design and updating code.
+
+A Warehouse model wouldn't take that risk, it would create a table attached to the individual with structure:
+
+* Phone Number Id (PK)
+* Phone Number Type (FK)
+* Phone Number
+
+What is massively important in Warehouse Modelling is getting the Reference data value sets right for the organisation.  These *type* values will be fed to every user of the warehouse data in reports and they need to have agreed terms and definitions.  
+
+<div class='emphasis'>
+It is probably fair to say that any suggestions of creating a Data Warehouse should be treated with caution.  They tend to come into play in very large corporate organisations where there is data scattered across many databases and the organisation is trying very hard to bring it into one place to make sense of it.
+
+It is an incredibly expensive undertaking to map sources into a warehouse model and "conforming" the data (gaining a common definition across many sources) is a very difficult thing to do without real stakeholder buy in and ownership of data. 
+</div>
+
+If you want to understand more on the pros and cons on Data Warehouses just do a google search on *pros and cons of data warehousing*!!
+
+
+## Dimensional Models
+
+Following on from Warehouse modelling is a brief look at Dimensional Models. 
+
+It would take another module to explain how to go about this in detail but it is an important type of model you may come across.
+
+The primary purpose of a dimensional model is to allow implementation of table structures which can hold data items, termed as **facts** which can be reported on dependent on a number of dimensions.  The reason it follows on from Warehouse modelling is that the physical implementation of dimensional models often contain data sourced from Data Warehouses.
+
+Here's an example of a Dimensional Model.
+
+The model coves a reporting requirement in a Tyre Warehouse -  how many tyres of each brand are sold within a month to one of our dealers?
+
+That requirement would look something like this in a dimensional model:
+
+![](images/tyre sales dimension.png)
+
+Tyre Sales is the Fact entity holding the fact Sales Quantity and the entities roundabout it (using the convention of Dim for Dimension) are the dimension entities providing the context of the Sales Quantity fact.
+
+You can see that this can be modelled in a standard Logical Modelling tool using keys and foreign keys.  As a logical model it is termed a Dimensional Model, when it moves onto a PDM for implementation it becomes a star schema, so named because it is shaped as a star (or snowflake) with the Fact table in the middle and the Dimension tables surrounding it.
+
+So this type of modelling can follow the conventional LDM to PDM process. It is also very helpful to have either the Warehouse LDM or just a standard LDM of the business available before embarking on these models because you will find you already have the definition of things such as Brand, Dealer and Sales Transaction in your LDM.  For a Dimensional model you are basically rejigging the things you already understand and have modelled into a different type of structure.
+
+
+<div class='emphasis'>
+More detail can be found in our reference book: Steve Hoberman: Data Modeling Made Simple
+
+Wikipedia has a good summary:  https://en.wikipedia.org/wiki/Dimensional_modeling
+
+And a nifty overview https://www.guru99.com/dimensional-model-data-warehouse.html
+
+</div>
+<br>
+
+
+## Taxonomies/Ontologies and Unstructured Data
+
+A very quick final word on modelling of Unstructured Data.
+
+The whole module so far has been focussed on modelling of structured data.
+
+<div class='emphasis'>
+Strucured Data is repetitive data, for example bank transactions - happen over and over again.  Data which results from repetitive business processes.  So you can define and model this data and structure the data into record formats.
+
+Unstructured Data on the other hand follows no particular pattern and is not repetitive.  The main buld of unstructured data is text, in letters, reports, emails, web pages, phone call transcriptions etc.  In a typical organisation there is masses of unstructured data.  
+</div>
+
+We know that data is power in terms of analytics but until now there was no way to tap into the rich information held in the unstructured data.
+
+That is changing with new technologies but it still needs to be extracted in a way that allows the information to be collected, grouped and analysed.
+
+This is done through extracting words which have been recognised as belonging to a taxonomy.
+
+Depending on the scope of the data within the organisation the taxonomies will differ.
+
+For example, taking our previous example of the Tyre Warehouse there will be a taxonomy defined:
+
+
+Tyre Brand
+
+  * Pirrelli
+  * Goodyear
+  * Dunlop
+  * Continental
+  * Firestone <br> etc.
+  
+Then you can have different levesl e.g. a split within Tyre Brand of *High Performance* and *Standard*
+
+As text is analysed it is categorised by the taxonomoies applied to it.
+
+An Ontology is a type of taxonomy where the words within the taxonomy relate to each other making it a map of words.
+
+We're not going to cover any more on this but its something else you might want to look at in your own time.
+
+<div class='emphasis'>
+Note once again we return to the importance of defining value sets!!
+
+They really are at the heart of being able to do useful things with your data.
+</div>
+
+
+  
+# Recap
+
+* Relational (ER) data modelling is not the only type of modelling you can use
+* Different solutions demand different modelling types
+* Ultimately, however, any flavour of data modelling requires the same approach to understanding and documenting what you are modelling
+* Data documentation is transferrable across models for different purposes - an attribute is always an attribute!
+* Reference data is a key thing to the understanding of any data and needs to be given the right level of attention
+

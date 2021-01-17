@@ -1,0 +1,67 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+ # MVP
+
+Using the dataset `austen_books()` from the package `janeaustenr`:
+
+1. Find the most common words in both Pride & Prejudice and Sense & Sensibility.
+2. Find the most common words in both Pride & Prejudice and Sense & Sensibility, not including stop words.
+3. Find the most common sentiment words in both Pride & Prejudice and Sense & Sensibility.
+
+```{r}
+library(tidyverse)
+library(janeaustenr)
+library(dplyr)
+library(tidyr)
+library(tidytext)
+library(janitor)
+
+
+```
+
+```{r}
+(austen_books())
+```
+
+
+#1
+```{r}
+austen_words <- 
+  austen_books() %>% 
+  filter(book == "Pride & Prejudice" | book =="Sense & Sensibility") %>% 
+  unnest_tokens(word, text) %>%
+  count(word, book, sort = TRUE) %>% 
+  arrange(desc(count = n)) %>% 
+  slice()
+
+austen_words
+```
+
+#2
+```{r}
+ austen_words <- austen_books() %>% 
+  filter(book == "Pride & Prejudice" | book =="Sense & Sensibility") %>% 
+  unnest_tokens(word, text) %>%
+  count(word, book, sort = TRUE) %>% 
+  arrange(desc(count = n)) %>% 
+   anti_join(stop_words) %>% 
+  slice()
+
+austen_words
+```
+#3
+
+```{r}
+austen_sentiment <- 
+  austen_words %>%
+  inner_join(get_sentiments("afinn")) %>%
+  slice(1:10) %>%
+  mutate(word = factor(word, levels = word)) %>%  
+  arrange(desc(count = n))
+
+austen_sentiment
+```
+

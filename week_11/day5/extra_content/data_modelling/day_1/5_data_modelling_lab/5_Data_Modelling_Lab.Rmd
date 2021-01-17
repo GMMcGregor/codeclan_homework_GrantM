@@ -1,0 +1,87 @@
+---
+title: "Data Modelling Lab"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    df_print: paged
+    css: styles.css
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Lab Objective
+
+To complete a Logical Data Model supporting the requirements of the Party Spaces Event Company's new booking application. 
+
+# Requirements Summary
+
+The Party Spaces Event Company requires a new application to facilitate input of booking details by an employee of the company in discussion with a customer.
+
+The event booking is made by the customer but has an assigned managing employee responsible for seeing the requirements are met.  On occasion, staff may book events for themselves where they also assume the role of customer.
+
+The application allows for the selection of one or more of a number of event spaces offered by the company. Spaces are categorised as different types for the purposes of selection and management reporting e.g. conference rooms, bar lounge areas, activity rooms. Each space has a description of facilities, plus location address.  Under one booking the customer may request use of one or more spaces based on a start and end time usage.
+
+Additionally there are a number of event options available including food packages, drinks packages and activities such as cocktail making classes, wine tasting etc.  Each option has a name, description, unit price and a maximum number of participants.  In addition, the classification of type of option is required, again for management reporting.  The customer may select a number of options under the booking specifying the number of units required for each.
+
+Customer information to be recorded is the name, date of birth (required to confirm over 18), and optional gender.  Additionally a contact phone number is required and optional email for email confirmation if required.  Employee information is name and office phone number.
+
+In addition to the selected options and chosen event space(s), the event booking itself requires the following information from the customer:
+
++ date of the event
++ name e.g. Nicole 21st Birthday Party
++ description e.g. Mixed group of family and friends to celebrate 21st birthday of the customer's daughter.
++ number of participants
++ any special instructions e.g. cake to be supplied by customer
++ a flag indicating if any of the party are under age for alcohol
+
+On creation of the booking the system will record:
+
++ the date the booking has been made
++ the deposit amount that has already been made by the customer
+
+The following items will be calculated and held with the booking in order to create a report out to the customer:
+
++ total cost of the event 
++ balance amount due
++ balance due date
+
+Out of scope is anything beyond the booking application e.g. payment calculations and status.
+
+
+# Instructions
+
+You are a group of data modellers tasked with creating the logical data model reflecting the business requirements as described above.  You will have access to a business analyst if you have any additional questions.
+
+1. Working in groups of 2 or 3 work through the requirements summary above.
+
+2. Using paper/pens initially, draft out entities and relationships
+
+3. Either continue on a paper model diagram for the group, or create a Navicat model file.
+
+4. Thinking about the process we used to arrive at the Customer Bank Account model, and looking back at the notes from the last session, complete a main subject area to 3NF rules with a minimum of:
+  + Entities
+  + Attributes
+  + Attribute optionalities
+  + Primary Keys
+  + Foreign Keys
+  + Relationships  
+ 
+5. If time allows also:
+  + Entity definitions
+  + Sensible attribute data types
+  + Relationship names
+
+<div class='emphasis'>
+Helping pointers!
+
+* You have a similar Individual and Individual role structure to that already modelled for the Customer Bank Account model - would be worth referencing that.
+* There is at least one resolving entity - make sure you address the attributes of the parent entities first as you will need to determine their keys before you sort out the resolving entities.
+* Don't worry about tidyness of your diagram, that can be sorted at the end.  It helps to spread the entities quite widely so you have room to move and tidy up later.
+
+</div>
+

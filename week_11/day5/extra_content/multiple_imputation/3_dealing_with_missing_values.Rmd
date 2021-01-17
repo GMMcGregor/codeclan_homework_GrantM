@@ -1,0 +1,133 @@
+---
+title: "Dealing with missing values - multiple imputation"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    df_print: paged
+    css: ../../../styles.css
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.align = 'center')
+library(tidyverse)
+```
+
+# Introduction 
+During the week 3 lesson on 'Dealing with missing values' a number of different methods on how to deal with missing values were covered. We covered single imputation, such as replacing missing values with mean or median. The definition of multiple imputations was also introduced:
+
+**Multiple imputations**: in summary, it involves using software to create plausible values based on correlations between responses and via a number of simulations. Each of the simulated datasets are analysed, and then the results are combined into the missing data. In essence, this technique uses models based on simulated data, to create values which you can impute into your missing values. 
+
+Let's take a look at this in practice!
+
+## Recap on data for exercise
+
+For the exercise from the 'Dealing with missing values' lesson we worked with some customer attrition data - that is, data which represents the loss of clients or customers. We have some data from a phone supply company (communication company). Let's load in the data and look at the missing values we have. 
+
+```{r}
+# load in the data
+comms_data <- read_csv("data/telecom_data.csv")
+
+# total_charges seems to come through as character, change to numeric
+comms_data <- comms_data %>% 
+              mutate(total_charges = as.numeric(total_charges))
+
+comms_data %>%
+  head(10)
+```
+
+You can see almost every column in the dataset contains some kind of missing value, and a wide array of them at that! 
+
+
+# Multiple imputation
+
+In the week 3 we went through single imputation example, let's now try the popular multiple impuation problem. For this, we can use an R add on package called `MICE`. This stands for **multiple imputation by chained equations** .  
+
+```{r}
+# We will be using mice library in r
+library(mice)
+```
+
+Mice package has a function known as `md.pattern()`.  It returns a tabular form of missing value present in each variable in a data set.
+
+```{r}
+md.pattern(comms_data, rotate.names = TRUE)
+```
+
+Let's look at this table. There are 17 observations with no missing values. There are 13 observations with missing values in `monthly_charges`. Similarly, there are 2 missing observations in `payment_method`, 2 in `total_charges`, and so on. 
+
+The corresponding graph just shows this visually. The pink squares are missing values, and the blue aren't.   
+
+Now let's impute missing values. 
+```{r}
+# lets do the simulations
+imputed_data <- mice(comms_data, m=5, maxit = 50, method = 'pmm')
+
+summary(imputed_data)
+```
+
+Here is an explanation of the arguments used within `mice`:
+
+* `m`  – Refers to the number of imputed data sets. The more imputations the better but compromise with efficiency. 5 is the default.   
+* `maxit` – Refers to number of iterations taken to impute missing values  
+* `method` – Refers to method used in imputation. We've used predictive mean matching here (this is the default). If only a single string entered here, then the same method will be applied across all columns with missing data. For a full list of method types available, type `?mice` in the console. 
+
+**What is predictive mean matching, and why is it the default?**  
+Predictive mean matching (PMM) is an attractive way to do multiple imputation for missing data, especially for imputing quantitative variables that are not normally distributed. Compared with standard methods based on linear regression and the normal distribution, PMM produces imputed values that are much more like real values. If the original variable is skewed, the imputed values will also be skewed. If the original variable is bounded by 0 and 100, the imputed values will also be bounded by 0 and 100. And if the real values are discrete (like number of children), the imputed values will also be discrete. That’s because the imputed values are real values that are “borrowed” from individuals with real data.
+
+*Note: `payment_method` hasn't been imputed, as categorical variables can't be imputed from other likely values. Remember back in the missing values lesson, we have to recode categorical variables - usually to a category like "unknown" or "na".* 
+
+Now we can check the values. The `imputate_data` list has many elements to it. The `imputed_data$data` contains the original data and `imputed$imp` holds the imputed data. Let's look at the `monthly_charges` and `total_charges` columns as they are the ones that have been imputed (can see this from the summary output). 
+<br>
+
+```{r}
+imputed_data$imp$monthly_charges
+```
+
+```{r}
+imputed_data$imp$total_charges
+```
+
+These are 5 lots of imputed data for the 16 missing values of `monthly_charges` and the 9 missing values of `total_charges`. 
+
+The reason we have 5 options here is because in reality for missing data there isn't a single 'right' answer. We don't know what the true value is and whatever we impute it with is an estimate. How do we know which one of these 5 options is the most 'correct'? We don't! Just the same as we don't know if the mean or median is more 'correct'. 
+
+Say we do single imputation and we replace the first missing value with say, 12.5 from the first imputation option. In reality the missing value is likely to be somewhere in between a range of values, based on the distribution of the non-missing observations.  
+
+With multiple imputation we take a number of different potential options to replace the missing value by (based on the distribution of the non-missing observations) and we build our model based on 5 different versions of the dataset (i.e. first using option 1 of the imputated values to fill the missing values in `monthly_charges`, then using option 2 etc.) and then use the `pool()` function (that's part of the mice package) to combine the results of these 5 models. So it is the model outputs that are 'averaged' as apposed to 'averaging' the imputed data. 
+
+This is why the purpose is important when deciding how to clean/engaineer your data.
+
+Since there are 5 imputed datasets, you can select any of them to impute the missing data using the `complete()` function.   
+
+<br>
+
+```{r}
+# get complete data (3rd out of 5)
+complete_data <- complete(imputed_data,3)
+
+# plot 
+ggplot(complete_data, aes(customerID, monthly_charges)) + geom_point()
+```
+
+This replaces your missing values. 
+
+Ok, but suppose that the next step in our analysis is to fit a linear model to the data. You may ask what imputed dataset to choose. The mice package makes it again very easy to fit a a model to each of the imputed dataset and then pool the results together. Let's test out pooling model fits. We use the `with()` function to state what statistical analysis approach we want to apply for each imputed dataset. And then the `pool()` function to combine the results of modelling on the 5 imputed datasets. Let's take a very simple linear model just to demonstrate the code.
+
+```{r}
+fit <- with(imputed_data, lm(total_charges ~ monthly_charges))
+summary(pool(fit))
+
+```
+
+This has taken results of the 5 models created on the 5 imputed datasets and pooled them all together, and then run a model. The variable `fit` containts the results of the fitting performed over the imputed datasets, while the `pool()` function pools them all together. Apparently, our `monthly_charges` variable isn't a significant predictor of `total_charges`. 
+
+
+
+# Additional resources 
+
+*[Another example using mice](https://datascienceplus.com/imputing-missing-data-with-r-mice-package/)  
+*[Several other powerful add on packages for working with data in R which contains missing values](https://www.analyticsvidhya.com/blog/2016/03/tutorial-powerful-packages-imputing-missing-values/)  
+

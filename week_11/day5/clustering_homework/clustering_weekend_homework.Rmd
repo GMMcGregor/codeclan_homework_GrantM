@@ -1,0 +1,27 @@
+---
+title: "Clustering weekend homework"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+* You have been provided some customer data from a shopping centre. Do some exploratory analysis on the data. Comment on findings. 
+
+* We are interested in creating a marketing campaign to target customers based on their spending score and annual income. Perform a k-means clustering to find if there are meaningful clusters in the data to target the customers. 
+
+* Perform k-means clustering and chose a value of k.
+
+* Visualise the clustering for your chosen value of k.
+
+* Do you think the clustering seems a good fit for this data?
+
+* Comment on the attributes on one or two of the clusters (maybe even give them a label if you like - like in section 4.1 of the 'Segmentation & clustering intro' lesson). 
+
+
+
+
+
+

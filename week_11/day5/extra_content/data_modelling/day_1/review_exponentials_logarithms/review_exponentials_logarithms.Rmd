@@ -1,0 +1,472 @@
+---
+title: "Review of exponentials and logarithms"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    df_print: paged
+    css: ../../../resources/note_styles.css
+  pdf_document: default
+---
+
+<div class="blame">
+author: "Del Middlemiss"<br>
+date: "8th May 2019 - rev. 24th July 2019"
+</div>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.align = 'center')
+```
+# Learning Objectives
+
+* Know the relationship between a logarithm and its exponent
+* Understand the difference between a common and natural log
+* Be able to solve an expression for an exponent using logs
+
+**Duration - 60 minutes**
+
+<hr>
+
+# Laws of exponentials
+
+An **exponential** function contains a term of the form
+
+$$a\times b^x$$
+where $a$ is just a number and $b$ is a positive number we call the **base**. The important thing here is that the argument of the function, $x$, occurs **as a power** or **exponent**. 
+
+So 
+
+$$y=4^x$$
+
+is an exponential function (the $x$ is 'up' in the power), whereas
+
+$$y=x^4$$
+
+is a **polynomial** rather than an exponential (in this case, a degree-4 polynomial).
+
+Let's see what some typical exponential functions look like
+
+```{r}
+exponential <- function(x, a, b){
+  return(a * (b ** x))
+}
+
+x <- seq(-3, 3, 0.1)
+plot(x, exponential(x, a = 1, b = 3), type = 'l', col = 'black', lty = 1)
+lines(x, exponential(x, a = 1, b = 4), col = 'red', lty = 1)
+lines(x, exponential(x, a = 1, b = 5), col = 'blue', lty = 1)
+lines(x, exponential(x, a = 1, b = (1/3)), col = 'black', lty = 2)
+lines(x, exponential(x, a = 1, b = (1/4)), col = 'red', lty = 2)
+lines(x, exponential(x, a = 1, b = (1/5)), col = 'blue', lty = 2)
+```
+
+All the exponentials with $b > 1$ 'blow up' as $x$ increases positively, and those with $b < 1$ 'blow up' as $x$ increases negatively.
+
+<br>
+<blockquote class='task'>
+**Task - 1 min**. What do you predict the exponential with $a=1$ and $b=1$ will look like?
+<details>
+<summary>**Solution**</summary>
+```{r}
+plot(x, exponential(x, a = 1, b = 1), type = 'l', col = 'black', lty = 1)
+```
+Not very exponential looking! But $1^x=1$ for any $x$!
+</details>
+</blockquote>
+<br>
+
+## What does something like '$b^5$' mean anyway?
+
+It simply means repeated multiplication!
+
+$$b^5 = b \times b \times b \times b \times b$$ 
+
+So $2^4 = 2 \times 2 \times 2 \times 2 = 16$.
+
+## OK, so what about '$b^{-3}$'?
+
+$$b^{-3} = \frac{1}{b^3}$$
+So $3^{-2} = \frac{1}{3^2} = \frac{1}{9} = 0.11111111...$. In particular $2^{-1} = \frac{1}{2} = 0.5$.
+
+## 1's and 0's are weird (just remember these)
+
+There are a few results that are more or less definitions. Just remember these.
+
+$$x^1 = x \; \; \; \textrm{ e.g. } \; \; \; 2^1 = 2$$
+$$1^x = 1 \; \; \; \textrm{ e.g. } \; \; \; 1^5 = 1$$
+$$x^0 = 1 \; \; \; (x \ne 0) \; \; \; \textrm{ e.g. } \; \; \; 9^0 = 1$$
+$$0^x = 0 \; \; \; (x \ne 0) \; \; \; \textrm{ e.g. } \; \; \; 0^3 = 0 $$
+
+## Multiplication law
+
+This looks a bit abstract until you see an example of it being used. If we multiply two exponentials $b^x$ and $b^y$ together, then
+
+$$b^x \times b^y = b^{x+y}$$
+
+e.g.
+
+$$ 3^2 \times 3^3 = (3 \times 3) \times (3 \times 3 \times 3) = 3^{2+3} = 3^5 = 243$$
+
+In `R` (we'll use `L` to force our numbers to be interpreted as integers)
+
+```{r}
+3L**2L * 3L**3L == 3L*3L * 3L*3L*3L
+
+# use brackets to separate exponent
+3L*3L * 3L*3L*3L == 3L**(2L+3L)
+```
+
+## Division law
+
+Again, this will look abstract until we see it used. If we divide one exponential by another
+
+$$\frac{b^x}{b^y} =b^x \times b^{-y} = b^{x-y}$$ 
+
+e.g.
+
+$$\frac{5^4}{5^2} = \frac{5 \times 5 \times 5 \times 5}{5 \times 5} = 5^4 \times 5^{-2} = 5^{4-2} = 5^2 = 25$$
+
+We can see this by 'cancelling' two $5$'s on the bottom and two $5$'s on the top.
+
+In R
+
+```{r}
+# need to use brackets to separate numerator and denominator
+5L**4L / 5L**2L == (5L*5L*5L*5L) / (5L*5L)
+(5L*5L*5L*5L) / (5L*5L) == 5L**4L * 5L**-2L
+
+# use brackets to separate exponent
+5L**4L * 5L**-2L == 5L**(4L-2L)
+```
+
+## Power law
+
+Finally, if we raise an exponential $b^x$ to a further power $y$ then
+
+$$(b^x)^y = b^{x \times y}$$
+
+e.g.
+
+$$ (2^2)^3 = (2 \times 2) \times (2 \times 2) \times (2 \times 2) = 2^{2 \times 3} = 2^6 = 64$$
+
+Let's do this in R
+
+```{r}
+# note we have to use brackets to do this
+(2L**2L)**3L == (2L*2L) * (2L*2L) * (2L*2L)
+
+# again, separate out exponent
+(2L*2L) * (2L*2L) * (2L*2L) == 2L**(2L*3L)
+
+# what goes wrong here?
+2L**2L**3L
+
+# the exponent on the right gets evaluated first
+2L**2L**3L == 2L**8L
+```
+
+<hr>
+
+# Laws of logarithms
+
+## What is a logarithm?
+
+A **logarithm** does the 'opposite' of an exponential, or you can think of it as 'undoing' an exponential. Logarithms have a **base**, in the same way that an exponential does, so we might talk about the 'log to the base 2 of a number'.
+
+Let's see the definition, and then talk it through more plainly
+
+$$y = b^x \Leftrightarrow \log_b(y) = x$$
+
+"If $y$ is base $b$ to the power $x$, then log to the base $b$ of $y$ is $x$"
+
+So, whenever you see $\log_b(y)$, think of this as asking the question<br><br>
+
+<center>**to what power should I raise the base $b$ to get the argument $y$?**</center><br>
+
+Seriously, repeat it to yourself, it really helps! Let's see a few examples
+
+$$2^4=16 \Leftrightarrow \log_2(16) = 4$$
+
+$$3^5=243 \Leftrightarrow \log_3(243) = 5$$
+
+Let's see how to do this in R using the `log()` function
+
+```{r}
+# log
+log(x = 16, base = 2)
+log(x = 243, base = 3)
+```
+
+<br>
+<blockquote class='task'>
+**Task - 2 mins** Try taking logs to appropriate bases in R to 'get back' the exponents in the following. <br><br> 
+[**Hint** Identify the base in the exponential, this will be base you want to pass to `log()`]  
+$$6^4 = 1296$$
+$$10^{-1} = \frac{1}{10} = 0.1$$
+$$8^{6.1} = 322737.121092$$
+<details>
+<summary>**Solution**</summary>
+```{r}
+log(x = 1296, base = 6)
+log(x = 0.1, base = 10)
+log(x = 322737.121092, base = 8)
+```
+</details>
+</blockquote>
+<br>
+
+## Common bases: $e$ and $10$
+
+Two bases are very common for exponents and logarithms: Euler's number $e \approx 2.718281828$ and the more familiar base-$10$. Euler's number has a whole bunch of mathematical properties that you may or may not have seen before, particularly relating to the *growth* and *change* of things. We won't go into details, but $e$ tends to crop up in many places in maths and statistics. If you see 
+
+$$\exp(x) \; \; \; \textrm{ and } \; \; \; \ln(y) $$
+
+(AKA the **'exponential'** and the **'natural logarithm'**) or similar in formulas, this just means
+
+$$e^x \; \; \; \textrm{ and } \; \; \; \log_e(y) $$
+
+The fact that $e$ is not a **whole number** causes us no difficulty at all, don't let it worry you. Let's see these in action in `R`
+
+```{r}
+# this should just be e**1, i.e. just e itself
+exp(1)
+
+# e**2.5
+exp(2.5)
+
+# and now natural logarithms, default in R is natural log, i.e. ln(), if we don't specify a base
+log(12.18249)
+
+# take exp() and then undo it with log(), all on one line
+log(exp(4.5))
+```
+
+If you are curious and want to understand a little more about $e$ and why it is so important, have a look at the [Numberphile video](https://youtu.be/AuA2EAgAegE) on it!
+
+Exponentials and logarithms using base-$10$ are much more common and familiar, but, to be honest, they are not as useful in maths and statistics.
+
+<br>
+<blockquote class='task'>
+**Task - 2 mins** Think back on the definition of the logarithm above, and the 'mantra' we recommended! Predict what the following will be
+$$\log_{10}(1000)$$
+<details>
+<summary>**Solution**</summary>
+Think "to what power should I raise $10$ to get $1000$?" $10^3 = 1000$, so $\log_{10}(1000)=3$
+</details>
+</blockquote>
+<br>
+
+In `R`:
+
+```{r}
+10**3
+log(10**3, base = 10)
+```
+
+## Log of a multiplication law
+
+Each of the 'exponential rules' has a comparable 'log rule'. Without more comment, here is the multiplication rule. If we are taking the log of a **product** (i.e. a multiplication) of numbers $x \times y$ then
+
+$$\log_b(x \times y) = \log_b(x) + \log_b(y) $$
+
+In `R` (we'll use the `all.equal()` function, which checks if floating point numbers are 'approximately' equal):
+
+```{r}
+x <- 3**2
+y <- 3**8
+
+# left hand side
+lhs <- log(x*y, base = 3)
+
+# right hand side
+rhs <- log(x, base = 3) + log(y, base = 3)
+
+all.equal(lhs, rhs)
+lhs
+rhs
+```
+
+## Log of a division law
+
+If we take the log of a **quotient** (i.e. a division) of numbers $\frac{x}{y}$ then
+
+$$\log_b \Big(\frac{x}{y} \Big) = \log_b(x) - \log_b(y)$$
+
+In R, and just for fun, let's use $e$ and the natural logarithm:
+
+```{r}
+# remember, exp(9) is just e**9
+x <- exp(9)
+y <- exp(2)
+
+# remember, calling log() without a 'base' argument just defaults to ln()
+# left hand side ln(x/y)
+lhs <- log(x/y)
+
+# right hand side ln(x) - ln(y)
+rhs <- log(x) - log(y)
+
+all.equal(lhs, rhs)
+lhs
+rhs
+```
+
+## Log of a power law
+
+If we take the log of a number to a power $x^a$ then
+
+$$\log_b(x^a) = a \times \log_b(x) $$
+
+In `R`, using base 10:
+
+```{r}
+x <- 10**4
+a <- 3
+x_cubed <- x**a
+
+# left hand side
+lhs <- log(x_cubed, base = 10)
+
+# right hand side
+rhs <- a * log(x, base = 10)
+
+all.equal(lhs, rhs)
+lhs
+rhs
+```
+
+<hr>
+
+# Logs 'undo' exponentials, exponentials 'undo' logs
+
+The main use of logs and exponentials you'll encounter is to 'undo' the other and 'get at' variables that are inside the log or exponential (or, in more 'mathsey' terms, make a variable the **subject** of an equation).
+
+## 'Undoing' an exponential
+
+For example, 'get' $x$ in the following expression:
+
+$$y = 9.44 = \exp(x)$$
+
+Take the log to the appropriate base of both sides. In this case `exp()` means we're using base $e$
+
+$$\ln(y) = \ln(9.44) = \ln(\exp(x)) = x$$
+
+So
+
+$$x = \ln(9.44) \approx 2.245$$
+
+In `R`:
+
+```{r}
+x <- log(9.44)
+x
+# and let's check. This should get us back to where we started
+exp(x)
+```
+
+<br>
+<blockquote class='task'>
+**Task - 3 mins** Use `R` to get $x$ in the expression $y = 1245.8 = 9^x$. Check your answer.<br><br>
+[**Hint** - think about what base to pass to `log()`]
+<details>
+<summary>**Solution**</summary>
+```{r}
+# the base is 9, so 
+x <- log(1245.8, base = 9)
+x
+# and let's check
+9**x
+```
+</details>
+</blockquote>
+<br>
+
+## 'Undoing' a log
+
+Now let's get $x$ in the following expression:
+
+$$y = 5.8 = ln(x)$$
+
+Exponentiate using the appropriate base on both sides. In this case, `ln()` means we're using base $e$
+
+$$ \exp(y) = \exp(5.8) = \exp(\ln(x)) = x$$
+
+So
+
+$$x = \exp(5.8) \approx 330.3$$
+
+In `R`:
+
+```{r}
+x <- exp(5.8)
+x
+
+# and let's check
+log(x)
+```
+
+<br>
+<blockquote class='task'>
+**Task - 3 mins** Use `R` to get $x$ in the expression $y = 6 = \log_{10}(x)$. Check your answer.
+<details>
+<summary>**Solution**</summary>
+```{r}
+# the base is 10, so
+x <- 10**6
+x
+# check answer
+log(x, base = 10)
+```
+</details>
+</blockquote>
+<br>
+
+# Recap
+
+<br>
+
+* What are the exponential multiplication, division and power laws?
+<details>
+<summary>**Answer**</summary>
+Multiplication: $b^x \times b^y = b^{x+y}$<br>
+Division: $\frac{b^x}{b^y} =b^x \times b^{-y} = b^{x-y}$<br> 
+Power: $(b^x)^y = b^{x \times y}$<br>
+</details>
+
+<br>
+
+* What is a logarithm?
+<details>
+<summary>**Answer**</summary>
+A logarithm with base $b$ is the inverse operation of an exponential with base $b$, we can think of it as undoing the exponential. 
+$$y = b^x \Leftrightarrow \log_b(y) = x$$
+</details>
+
+<br>
+
+* What exponential and log functions do we use with base `e`?
+<details>
+<summary>**Answer**</summary>
+$\exp(x)$ and $\log(y)$ related by $y = \exp(x) \Leftrightarrow \ln(y) = x$
+</details>
+
+<br>
+
+* What are the logarithmic multiplication, division and power laws?
+<details>
+<summary>**Answer**</summary>
+Multiplication: $\log_b(x \times y) = \log_b(x) + \log_b(y)$<br>
+Division: $\log_b \Big(\frac{x}{y} \Big) = \log_b(x) - \log_b(y)$<br>
+Power: $\log_b(x^a) = a \times \log_b(x)$<br>
+</details>
+
+<br>
+
+* How do we (i). undo a logarithm, (ii). undo an exponential?
+<details>
+<summary>**Answer**</summary>
+We can undo a logarithm by taking the exponential to the correct base (i.e. to the same base as the logarithm), and undo an exponential by taking a logarithm to the correct base.
+</details>
+
+<br>

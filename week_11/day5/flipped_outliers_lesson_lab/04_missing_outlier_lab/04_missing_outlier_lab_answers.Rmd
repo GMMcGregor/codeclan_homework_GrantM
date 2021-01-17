@@ -1,0 +1,238 @@
+---
+title: "Cleaning Data Lab"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    df_print: paged
+    css: ../../../styles.css
+  pdf_document: default
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.align = 'center')
+library(tidyverse)
+```
+
+
+
+The dataset we will use for this lab is part of the World Bank Data project. Specifically, we are using the "Women in Parliament" dataset, which includes the percentage of women in parliament (“single or lower parliamentary chambers only”) by country (region) and year. [Full details can be found here](https://data.worldbank.org/indicator/SG.GEN.PARL.ZS). 
+
+We have already download the data and saved it as a .csv file called `women_in_gov` for you. This particular dataset contains everything we have covered today: metadata in the file, character and numeric variables, untidy data, and missing values. 
+
+<br>
+
+**Question 1**
+
+Load in the `women_in_gov` csv file. Make sure you remove all metadata from the top. 
+
+```{r}
+# Question 1. Load in the `women_in_gov` csv file. Make sure you remove all metadata from the top. 
+
+women_in_gov <- read_csv("data/women_in_gov.csv", skip = 4)
+```
+
+<br>
+
+**Question 2**
+
+
+Some of the column names contain spaces and numbers. Fix the column names. 
+
+
+```{r}
+# Question 2. Some of the column names contain spaces and numbers.
+library(janitor)
+
+women_in_gov_clean <- women_in_gov %>%
+  clean_names()
+
+names(women_in_gov_clean)
+```
+
+
+
+<br>
+
+**Question 3**
+
+We have some columns in the data that don't really need to  be there. Confirm that the `X64`, `Indicator.Name` and `Indicator.Code` have the same values for all observations. If they do, remove those columns. 
+
+
+```{r}
+# Question 3. We have some columns in the data that don't really need to  be there.
+
+# check that these columns have useless info in them
+women_in_gov_clean %>% distinct(x64)
+women_in_gov_clean %>% distinct(indicator_name)
+women_in_gov_clean %>% distinct(indicator_code)
+
+# remove the redundant columns
+women_in_gov2 <- women_in_gov_clean %>% 
+  select(-indicator_name, -indicator_code, -x64)
+  
+```
+
+
+
+<br>
+
+**Question 4**
+
+Think back to yesterday where we talked about wide vs long format. As the data is in wide format, it's pretty clear to see we have a lot of missing values. Reshape the data from wide to long format, so that for each country the year column becomes a row. Name the column you put your values into (i.e. the 'values_into' argument) `prop_women`. 
+
+
+
+```{r}
+# Question 4. Transform the data from wide to long
+women_in_gov_long <- women_in_gov2 %>%
+  pivot_longer(cols = starts_with("x"), 
+               names_to = "year", 
+               values_to = "prop_women")
+
+women_in_gov_long
+```
+
+
+
+
+<br>
+
+**Question 5**
+
+You'll notice your `prop_women` column contains missing values. Let's do a few things. First, let's count how many missing values you have. Then check how many different missing values you have (e.g. how many unique ones do you have). Then decide how you will deal with them. Will you insert average imputation values, most common imputation values, or use the multiple imputation method? Explain your decision. Then fix the missing values.   
+
+
+```{r}
+# Question 5. Count how many missing values you have, check if you have differently coded ones, and then remove them. Check you've done this right. 
+
+# counting missing values
+women_in_gov_long %>%
+  summarise(count = sum(is.na(prop_women)))
+
+# look at what different missing values we have
+missing_gov <- women_in_gov_long %>% 
+  select(prop_women) %>% 
+  filter(is.na(prop_women))
+
+# check how many different ones we have
+unique(missing_gov$prop_women)
+
+# There are lots of different options here. If it was me, I would probably just drop the values by doing this:
+women_in_gov <- women_in_gov_long %>%
+  drop_na()
+
+# I would do this because: 
+# (1) there are so many missing values - you would be imputing more missing values than you actually have. 
+# (2) there is probably a vast difference in the proportion of women in government by country, and the results are no doubt biased. 
+#     For example, UK will have more women in government positions than perhaps, the south sudan. So imputing values might not work so well. 
+
+# For me, I'd stick with dropping the missing in this case. However, it's up to you what you do - it's your decision as an analyst. 
+
+
+```
+
+
+
+
+<br>
+
+**Question 6**
+
+Create a boxplot to see if there are any outliers in the proportion of women.
+
+
+
+```{r}
+# Question 6. Use a box plot to see if we have outliers in the proportion column
+ggplot(women_in_gov, aes(x = "prop", y = prop_women)) +
+    geom_boxplot()
+```
+
+
+
+
+<br>
+
+**Question 7**
+
+Calculate a zscore for each observation in your data. Mark any of the values in the `prop_women` column that are more or less than 3 standard deviations above or below the mean as outliers. Add this outlier flag as a new column within the dataset. Create a table that only contains the outliers and have a look at them. 
+
+
+```{r}
+# Question 7. Calculate a zscore for each value in the prop_women column, and then add a column to show which values are the outliers 
+
+# load the outliers package
+library(outliers)
+
+# get the z-scores for each value in prop_women
+prop_zscores <- scores(women_in_gov$prop_women)
+
+# add a column with info whether the refund_value is an outlier
+is_outlier <- prop_zscores > 3 | prop_zscores < -3
+women_in_gov <- women_in_gov %>%
+  mutate(is_outlier = is_outlier)
+
+# create a table with only outliers
+women_outliers <- women_in_gov %>% 
+  filter(is_outlier == TRUE)
+
+women_no_outliers <- women_in_gov %>%
+  filter(is_outlier == FALSE)
+
+```
+
+
+
+<br>
+
+**Question 8**
+
+Next decide - what will you do with these outliers? Create a table with your newly dealt with outliers. 
+
+
+```{r}
+# Question 8 
+
+# have a look at the outlier data and the non outlier data - what are the ranges 
+ggplot(women_outliers, aes(country_name, prop_women)) +
+    geom_point()
+
+# seems to be quite high, but then again, some countries may have a much higher proportion than others. So this is perhaps correct. Looking at the countries, some make sense - I would perhaps expect Sweden and Iceland to have more females in parliament than other places. The other countries surprise me slightly, but it's only because i don't really know what the parliamentary systems are there. I would be very wary about removing these. For me, I would leave them in, and call this dataset cleaned. 
+
+```
+
+
+
+<br>
+
+**Question 9**
+
+Now you have your clean dataset, let's do some summarising. Find the top 10 countries with the highest mean proportion of women in government across all the years. Then find the bottom 10.
+
+```{r}
+# find the top 10 countries with highest mean proportion of women
+top_10_women <- women_no_outliers %>%
+                  arrange(country_name, country_code, year) %>%
+                  group_by(country_name, country_code) %>%
+                  summarise(mean_women = mean(prop_women)) %>%
+                  arrange(desc(mean_women)) %>%
+                  head(10)
+
+top_10_women
+
+# find the bottom
+bottom_10_women <- women_no_outliers %>%
+                  arrange(country_name, country_code, year) %>%
+                  group_by(country_name, country_code) %>%
+                  summarise(mean_women = mean(prop_women)) %>%
+                  arrange(mean_women) %>%
+                  head(10)
+
+bottom_10_women
+```
+
+
+

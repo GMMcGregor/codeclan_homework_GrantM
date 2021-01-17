@@ -1,0 +1,158 @@
+---
+title: "Physical Data Modelling"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    df_print: paged
+    css: styles.css
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Learning Objectives
+
+* Understanding the process of creating the PDM
+* Recognise areas for change from LDM to PDM
+* Understand the use of the PDM
+
+### Duration - 45 minutes
+
+# Physical Data Modelling
+
+Physical data modelling is the process of taking the LDM and "tweaking" its content for implementation on specific hardware or software.
+
+A PDM ulitmately documents a schema, or database structure.
+
+Because the PDM is implementation specific a PDM is scoped for an individual solution, e.g. a DB2 Customer Database.  However, that PDM should have been derived from the business LDM which is solution agnostic.  So over time any number of PDMs can be derived from a single LDM.  The benefits of this is that the organisation has a consistent definition of their physical solutions and cross system data movements or analysis become much easier.
+
+*Hence the importance of keeping your LDM current!*
+
+
+# Differences between the LDM and the PDM
+
+1. Entities are referred to as Tables
+2. Attributes are referred to as Columns (or sometimes fields depending on the tool)
+3. Data types become specific to the selected database type - e.g. SMALLINT, BIGINT, VARCHAR, REAL etc for DB2
+4. Table and column names are changed from the business friendly LDM names to reflect the database standards e.g. restricted to 15 characters, spaces replaced by underscores
+5. Natural keys are usualy (but they don't need to be) replaced by Surrogate Ids which will be system generated.
+6. Natural keys might then be set up as indexes for specific retrieval requirements.  E.g. Surname might be part of a concatenated key of Individual but becomes an index in the PDM. Indexes allow quick pointers into tables.
+7. Referential integrity rules are defined using the LDM associations and foreign key definitions.
+8. Views (virtual tables) are defined where there is a requirement to bring back data from across a number of tables dynamically usually for analysis/reporting purposes.
+9. LDM structures are "optimised" to facilitate efficient storage and retrieval.  These changes to the LDM structures need to be justified through design requirements and should be agreed with the logical modeller who should have a view on the long term use of the structures.  We'll come onto some typical scenarios now.
+
+
+## Optimising LDM structures in the PDM
+
+The PDM provides the database design and depending on how that database is likely to be used, and what the volumes of records and access transactions are likely to be.
+
+It might be that the lovely LDM structure that describes things beautifully to the business user actually fills the Database Administrator (DBA) with horror and it needs changed in the design.
+
+### Subtypes/Supertypes
+
+A common example of this is a complex subtype/supertype structure.
+
+Looking at this example:
+
+![](images/Course subtype.png)
+
+Credit: Steve Hoberman  https://www.google.co.uk/url?sa=i&source=images&cd=&cad=rja&uact=8&ved=0ahUKEwjCnNu1na3kAhUoyoUKHfiEDSwQMwhvKBUwFQ&url=https%3A%2F%2Fstevehoberman.com%2Fgetting-physical-with-subtypes%2F&psig=AOvVaw0qtiUAkvAU5_lpyydNn634&ust=1567345043977636&ictx=3&uact=3
+
+Physical models model implementable structures and can't manage the inheritance aspects of supertypes and subtypes. So an implementation needs to be decided.  There are a number of things you can do with this structure:
+
+1. Rolling down: Remove the supertype entity and copy all of the data elements and relationships from the supertype to each of the subtypes.
+
+2. Rolling up: Remove the subtypes and copy all of the data elements and relationships from each subtype to the supertype. Also add a type code to distinguish the subtypes.
+
+3. Identity: Convert the subtype symbol into a series of one-to-one relationships, keeping the supertype but connecting it to each of the subtypes.
+
+
+What are the pros and cons of each option?
+
+<details>
+<summary>**Answers**</summary>
+
+Option 1 means that the **Learning Track** rule is retained but there is a duplicate of the *Taught At* relationship and the *Require as prerequisite* relationship would need to be moved to a new *Workshop/Workshop* relationship and added from **Workshop** to **Lecture**.
+
+Option 2 would simplify the model but you would lose the rule that it is only a **Course** of type **Workshop** that is a prerequisite to anything and you also lose the fact that a **Learning Track** consists of many **Lectures** but only one **Workshop**. 
+
+Option 3 makes for rather a convoluted path to get to **Workshop** or **Lecture** and without a typing on the supertype you don't know which leg to go down from the course.
+
+Option 1 is the most common implementation option as it retains the flexibility of the subtype definitions even though it introduced duplicate structures (note this is not data duplication or redundancy).  
+
+However, if your structures were very simple, there were not different relationships at the subtype level, and you were not expecting a plethora of new subtypes in the future then Option 2 would probably be the preferred approach.
+
+Option 3 isn't a common implementation pattern as it introduces an extra layer of navigation.
+
+</details>
+
+
+### Other constructs to consider
+
+* 1:1 associations these usually ring alarm bells in design as they suggest that the two entities are actually the same thing.  These can potentially be collapsed together.
+* An associative entity can possibly have one of the parents collapsed into it.  But given we came up with the entity to address repeating groups (1NF rule) then this rarely happens as it would lead to repeating foreign keys.
+
+
+<blockquote class = 'task'>
+
+**Task - Considering Sub Types - 10 minutes**
+
+Let's have a look at our final LDM for the Customer Account and the role sub types area.
+
+<details>
+<summary>**Individual Role Types diagram**</summary>
+
+![](images/Individual Role Subtypes.png)
+
+</details>
+
+Consider what you think would be the optimum solution in the PDM for the subtypes of the INDIVIDUAL ROLE entity.  
+
+Just use pen and paper to play with the options.
+
+
+<details>
+<summary>**Answer**</summary>
+
+We have two possible options:
+<br>
+![](images/Individual Role Option 1.png)
+
+<br>
+![](images/Individual Role Option 2.png)
+
+As we discussed before, there are pros and cons to all options but in this case the preferred solution would probably be option 1 - rolling down the supertype into the differences in attributes and relationships of the subtypes.
+
+</details>
+
+</blockquote>
+
+
+# Normal PDM steps
+
+The normal process for creating the PDM is as follows:
+
+1. Take your LDM and use to create what is termed a "first cut" PDM
+2. Sort out your name standards and data types
+3. Optimise any structures as we've discussed
+4. Ensure your FKs are working correctly 
+5. Build any additional views or indexes
+6. Press the button to create the implementable DDL (SQL)
+7. Generate a data dictionary if possible (you should have brought all your definitions through from the LDM)
+
+All of this works a treat with some good tooling and much of it is automated.  Navicat is a very basic option here so we won't explore further.
+
+Be aware that the real technical discussions on implementing the LDM into an efficient PDM usually take place with the help of a DBA and the designers of any systems using the database.  It is not something that the LDM modeller usually needs to do alone.
+
+
+# Recap
+
+* The PDM is a model based on the LDM but tweaked for efficient implementable design
+* Good tooling options are key to automating content such as physical name and data type transformations
+* There are rules to be followed in tweaking the structures
+* PDM creation should be a joint effort with designers
+
