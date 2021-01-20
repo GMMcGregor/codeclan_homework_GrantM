@@ -1,0 +1,131 @@
+---
+title: "Clustering weekend homework - solutions"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, message = FALSE}
+library(tidyverse)
+library(janitor)
+```
+
+
+```{r}
+customers <- read_csv("mall_customers.csv") %>%
+                clean_names()
+```
+
+Do some exploratory analysis on the data. Comment on findings. 
+
+```{r}
+summary(customers)
+```
+
+```{r}
+customers %>%
+  group_by(gender) %>%
+  summarise(count = n()) %>%
+ggplot(aes(x = gender, y = count)) +
+  geom_col()
+```
+
+```{r}
+ggplot(customers, aes(x = annual_income_k, y = spending_score_1_100)) +
+  geom_point()
+```
+
+```{r}
+ggplot(customers, aes(x = annual_income_k)) +
+  geom_histogram()
+```
+
+
+```{r}
+ggplot(customers, aes(x = spending_score_1_100)) +
+  geom_histogram()
+```
+
+
+```{r}
+ggplot(customers, aes(x = age)) +
+  geom_histogram(bins = 50)
+```
+
+
+We are interested in creating a marketing campaign to target customers based on their spending score and annual income. Perform a k-means clustering to find if there are meaningful clusters in the data to target the customers. 
+
+```{r}
+customers_scale <- customers %>% 
+  select(annual_income_k, spending_score_1_100) %>%
+    mutate_all(scale)
+
+summary(customers_scale)
+```
+
+```{r}
+ggplot(customers_scale, aes(x = annual_income_k, y = spending_score_1_100)) +
+  geom_point()
+```
+
+There looks to be dispersion in the data and can see some potential cluster groupings, so clustering looks like it may be appropriate here. 
+
+```{r}
+library(broom)
+
+# Set min & max number of clusters want to look at 
+max_k <- 20 
+
+k_clusters <- tibble(k = 2:max_k) %>%
+  mutate(
+    kclust = map(k, ~ kmeans(customers_scale, .x, nstart = 25)), 
+    tidied = map(kclust, tidy),
+    glanced = map(kclust, glance),
+    augmented = map(kclust, augment, customers_scale)
+  )
+
+k_clusters
+```
+
+
+```{r}
+library(factoextra)
+fviz_nbclust(customers_scale, kmeans, method = "wss", nstart = 25)
+fviz_nbclust(customers_scale, kmeans, method = "silhouette", nstart = 25)
+fviz_nbclust(customers_scale, kmeans, method = "gap_stat", nstart = 25)
+```
+
+
+There looks to be a clear defined elbow at k = 5 and this was also selected for the silhouette method so go ahead with k = 5. 
+
+```{r}
+customer_clusters_k5 <- k_clusters %>% 
+  unnest(cols = c(augmented)) %>%
+  filter(k == 5) 
+```
+
+
+And let's plot the data:
+```{r}
+ggplot(customer_clusters_k5, aes(x = annual_income_k, y = spending_score_1_100)) +
+  geom_point(aes(color = .cluster))
+```
+
+Do you think the clustering seems a good fit for this data?
+```{r}
+#yes based on the clearly defined clusters from the visuals and that there is a majority of a value of k for the 3 methods for selecting k. 
+```
+
+
+Comment on the attributes on one or two of the clusters (maybe even give them a label if you like - like in section 4.1 of the 'Segmentation & clustering intro' lesson). 
+
+```{r}
+#Cluster number 5 is high income and high spend - these may be more 'high end' customers and could look to target them accordingly. 
+#Cluster number 2 is high income but low spend - perhaps they mainly shop at other malls or spend money on activities/items not sold within your mall. Perhaps may want to target with further data collection to find out more about this in case we are able to target with a particular campaign if we find they are shopping at competitors. 
+```
+
+
+
+
