@@ -1,0 +1,44 @@
+---
+title: "Machine Learning in Python Lab"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    df_print: paged
+    css: ../../../styles.css
+  pdf_document: default
+---
+
+
+# MVP
+
+The data in "songs.csv" contains descriptive information on various songs from Spotify and one person's personal opinion of each song. We want you to build a model that can predict "target"; target is a 1 when they liked the song, and 0 when the did not like it.
+
+You need to decide:
+
+* Which variables to use
+* Do you want to do any feature engineering?
+* How to explore and clean the data
+* Which model to use
+* Do you want to change any of the parameters of the mode?
+* How to measure the accuracy of the model
+
+You will want to build several models and compare the accuracy between them. Try to get the best model possible, but be careful about over fitting.
+
+For this lab, please use Python.
+
+# Extension
+
+Try using a machine learning model that we have not covered in class. Some suggestions include:
+
+* Support Vector Machines
+* Neutral networks
+* Naive Bayes
+* K-nearest neighbours 
+
+You will want to make sure you understand the models if you are using them. It's fine to get working code early on, but you need to go back and understand roughly how the algorithm works, and any arguments passed or assumed by default.
+
+You can find more documentation on these models on the Scikit learn website: 
+
+This blog post has helpful summaries of some of the available models: https://stackabuse.com/classification-in-python-with-scikit-learn-and-pandas/
